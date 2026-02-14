@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Импорт пива 0,33 — калькулятор (до порта РФ)</title>
+  <style>
+    :root { --b:#e5e7eb; --t:#111827; --m:#6b7280; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color:var(--t); margin:20px; }
+    h1 { font-size:18px; margin:0 0 12px; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:14px; align-items:start; }
+    .card { border:1px solid var(--b); border-radius:12px; padding:14px; }
+    .card h2 { font-size:14px; margin:0 0 10px; }
+    label { display:flex; justify-content:space-between; gap:10px; align-items:center; padding:6px 0; border-bottom:1px dashed #f0f2f5; }
+    label:last-child { border-bottom:none; }
+    input, select { width:170px; padding:8px 10px; border:1px solid var(--b); border-radius:10px; font-size:14px; }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .hint { color:var(--m); font-size:12px; line-height:1.35; margin-top:8px; }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    td { padding:8px 0; border-bottom:1px solid #f0f2f5; }
+    td:last-child { text-align:right; font-variant-numeric: tabular-nums; }
+    .kpi { font-weight:700; }
+    .btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    button { padding:10px 12px; border-radius:10px; border:1px solid var(--b); background:#fff; cursor:pointer; }
+    button:hover { background:#f9fafb; }
+    .mono { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <h1>Импорт пива 0,33 (до порта РФ): пошлина + акциз + НДС + логистика/сервисы</h1>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Вводные</h2>
+
+      <label>
+        <span>Контейнеров</span>
+        <input id="containers" type="number" step="1" value="30">
+      </label>
+
+      <label>
+        <span>Паллет в контейнере</span>
+        <input id="palletsPerContainer" type="number" step="1" value="24">
+      </label>
+
+      <label>
+        <span>Коробок на паллете</span>
+        <select id="casesPerPallet">
+          <option value="80" selected>80 (реалистично)</option>
+          <option value="99">99</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Бутылок в коробке</span>
+        <input id="bottlesPerCase" type="number" step="1" value="24">
+      </label>
+
+      <label>
+        <span>Объём бутылки (л)</span>
+        <input id="bottleL" type="number" step="0.01" value="0.33">
+      </label>
+
+      <hr style="border:none;border-top:1px solid var(--b); margin:12px 0;">
+
+      <label>
+        <span>Таможенная стоимость, ₽/бут<br><span class="hint">FOB + freight + insurance (CIF логика)</span></span>
+        <input id="customsValuePerBottle" type="number" step="0.01" value="50">
+      </label>
+
+      <label>
+        <span>Фрахт, ₽/контейнер<br><span class="hint">если хочешь отдельно. будет распределён по бутылкам</span></span>
+        <input id="freightPerContainer" type="number" step="1" value="0">
+      </label>
+
+      <label>
+        <span>THC/терминал/порты, ₽/конт</span>
+        <input id="thcPerContainer" type="number" step="1" value="0">
+      </label>
+
+      <label>
+        <span>Документы/брокер, ₽/конт</span>
+        <input id="brokerPerContainer" type="number" step="1" value="0">
+      </label>
+
+      <div class="hint">
+        Если ты уже включил фрахт в “таможенную стоимость ₽/бут”, ставь “фрахт ₽/конт = 0”, чтобы не задвоить.
+      </div>
+
+      <div class="btns">
+        <button id="resetBtn" type="button">Сброс к дефолту</button>
+        <button id="exampleBtn" type="button">Пример: фрахт/THC/брокер</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Налоги и курсы</h2>
+
+      <label>
+        <span>Акциз, ₽/л</span>
+        <input id="exciseRubPerL" type="number" step="0.01" value="33">
+      </label>
+
+      <label>
+        <span>Пошлина, €/л</span>
+        <input id="dutyEurPerL" type="number" step="0.0001" value="0.018">
+      </label>
+
+      <label>
+        <span>Курс EUR/RUB</span>
+        <input id="fxEurRub" type="number" step="0.0001" value="91.56">
+      </label>
+
+      <label>
+        <span>НДС</span>
+        <input id="vatRate" type="number" step="0.01" value="0.22">
+      </label>
+
+      <div class="hint">
+        Формула НДС (упрощённо): (таможенная стоимость + пошлина + акциз) × НДС.<br>
+        Таможенные сборы/прочее можно учитывать в “THC/брокер”, но если хочешь строгую базу НДС — добавь их в таможенную стоимость.
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <h2>Результаты</h2>
+    <table>
+      <tr><td>Бутылок на паллете</td><td id="out_bottlesPerPallet" class="mono"></td></tr>
+      <tr><td>Бутылок в контейнере</td><td id="out_bottlesPerContainer" class="mono kpi"></td></tr>
+      <tr><td>Всего бутылок</td><td id="out_totalBottles" class="mono kpi"></td></tr>
+
+      <tr><td colspan="2" style="padding-top:12px; border-bottom:none;"><b>Налоги/сборы на 1 бутылку</b></td></tr>
+      <tr><td>Пошлина, ₽/бут</td><td id="out_dutyPerBottle" class="mono"></td></tr>
+      <tr><td>Акциз, ₽/бут</td><td id="out_excisePerBottle" class="mono"></td></tr>
+      <tr><td>НДС, ₽/бут</td><td id="out_vatPerBottle" class="mono"></td></tr>
+      <tr><td>THC+брокер+фрахт (распр.), ₽/бут</td><td id="out_logPerBottle" class="mono"></td></tr>
+      <tr><td class="kpi">Итого “до порта”, ₽/бут</td><td id="out_totalPerBottle" class="mono kpi"></td></tr>
+
+      <tr><td colspan="2" style="padding-top:12px; border-bottom:none;"><b>Итоги</b></td></tr>
+      <tr><td>Итого на контейнер, ₽</td><td id="out_totalPerContainerRub" class="mono kpi"></td></tr>
+      <tr><td>Итого на все контейнеры, ₽</td><td id="out_totalAllRub" class="mono kpi"></td></tr>
+    </table>
+    <div class="hint" id="notes"></div>
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  const inputs = [
+    "containers","palletsPerContainer","casesPerPallet","bottlesPerCase","bottleL",
+    "customsValuePerBottle","freightPerContainer","thcPerContainer","brokerPerContainer",
+    "exciseRubPerL","dutyEurPerL","fxEurRub","vatRate"
+  ];
+
+  function n(v){ return Number(v || 0); }
+  function fmt(v, digits=2){
+    if (!isFinite(v)) return "—";
+    return v.toLocaleString("ru-RU", { maximumFractionDigits: digits, minimumFractionDigits: digits });
+  }
+  function fmt0(v){
+    if (!isFinite(v)) return "—";
+    return v.toLocaleString("ru-RU");
+  }
+
+  function calc(){
+    const containers = n($("containers").value);
+    const palletsPerContainer = n($("palletsPerContainer").value);
+    const casesPerPallet = n($("casesPerPallet").value);
+    const bottlesPerCase = n($("bottlesPerCase").value);
+    const bottleL = n($("bottleL").value);
+
+    const customsValuePerBottle = n($("customsValuePerBottle").value);
+
+    const freightPerContainer = n($("freightPerContainer").value);
+    const thcPerContainer = n($("thcPerContainer").value);
+    const brokerPerContainer = n($("brokerPerContainer").value);
+
+    const exciseRubPerL = n($("exciseRubPerL").value);
+    const dutyEurPerL = n($("dutyEurPerL").value);
+    const fxEurRub = n($("fxEurRub").value);
+    const vatRate = n($("vatRate").value);
+
+    const bottlesPerPallet = casesPerPallet * bottlesPerCase;
+    const bottlesPerContainer = palletsPerContainer * bottlesPerPallet;
+    const totalBottles = containers * bottlesPerContainer;
+
+    // Taxes per bottle
+    const dutyPerBottle = bottleL * dutyEurPerL * fxEurRub;
+    const excisePerBottle = bottleL * exciseRubPerL;
+
+    // logistics/services per bottle (allocated)
+    const logPerBottle = bottlesPerContainer > 0
+      ? (freightPerContainer + thcPerContainer + brokerPerContainer) / bottlesPerContainer
+      : 0;
+
+    // VAT base (simplified)
+    const vatBasePerBottle = customsValuePerBottle + dutyPerBottle + excisePerBottle;
+    const vatPerBottle = vatBasePerBottle * vatRate;
+
+    // Total per bottle
+    const totalPerBottle = customsValuePerBottle + dutyPerBottle + excisePerBottle + vatPerBottle + logPerBottle;
+
+    const totalPerContainerRub = totalPerBottle * bottlesPerContainer;
+    const totalAllRub = totalPerContainerRub * containers;
+
+    $("out_bottlesPerPallet").textContent = fmt0(bottlesPerPallet);
+    $("out_bottlesPerContainer").textContent = fmt0(bottlesPerContainer);
+    $("out_totalBottles").textContent = fmt0(totalBottles);
+
+    $("out_dutyPerBottle").textContent = fmt(dutyPerBottle, 2);
+    $("out_excisePerBottle").textContent = fmt(excisePerBottle, 2);
+    $("out_vatPerBottle").textContent = fmt(vatPerBottle, 2);
+    $("out_logPerBottle").textContent = fmt(logPerBottle, 2);
+    $("out_totalPerBottle").textContent = fmt(totalPerBottle, 2);
+
+    $("out_totalPerContainerRub").textContent = fmt0(Math.round(totalPerContainerRub));
+    $("out_totalAllRub").textContent = fmt0(Math.round(totalAllRub));
+
+    // Notes / sanity
+    let notes = [];
+    notes.push(`Схема: ${casesPerPallet} коробок/паллета × ${bottlesPerCase} бут/коробка × ${palletsPerContainer} паллет/конт = ${fmt0(bottlesPerContainer)} бут/конт.`);
+    if (freightPerContainer > 0 && customsValuePerBottle > 0){
+      notes.push(`Проверь, не задвоил ли ты фрахт: сейчас он учтён как отдельная строка (₽/конт) и НЕ включён в “таможенную стоимость ₽/бут”.`);
+    }
+    $("notes").textContent = notes.join(" ");
+  }
+
+  function wire(){
+    inputs.forEach(id => {
+      $(id).addEventListener("input", calc);
+      $(id).addEventListener("change", calc);
+    });
+
+    $("resetBtn").addEventListener("click", () => {
+      $("containers").value = 30;
+      $("palletsPerContainer").value = 24;
+      $("casesPerPallet").value = 80;
+      $("bottlesPerCase").value = 24;
+      $("bottleL").value = 0.33;
+
+      $("customsValuePerBottle").value = 50;
+      $("freightPerContainer").value = 0;
+      $("thcPerContainer").value = 0;
+      $("brokerPerContainer").value = 0;
+
+      $("exciseRubPerL").value = 33;
+      $("dutyEurPerL").value = 0.018;
+      $("fxEurRub").value = 91.56;
+      $("vatRate").value = 0.22;
+
+      calc();
+    });
+
+    // пример — просто чтобы было от чего плясать (меняй под себя)
+    $("exampleBtn").addEventListener("click", () => {
+      $("freightPerContainer").value = 350000; // условно
+      $("thcPerContainer").value = 90000;      // условно
+      $("brokerPerContainer").value = 35000;   // условно
+      calc();
+    });
+
+    calc();
+  }
+
+  wire();
+</script>
+</body>
+</html>

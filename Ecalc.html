@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Eclipse калькулятор</title>
+  <style>
+    :root { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+    body { margin: 18px; color: #111; }
+    .row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 14px; min-width: 320px; flex: 1; }
+    h1 { font-size: 18px; margin: 0 0 12px; }
+    h2 { font-size: 14px; margin: 0 0 10px; }
+    label { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+    input[type="checkbox"] { width: 18px; height: 18px; }
+    select { padding: 6px 10px; border-radius: 8px; border: 1px solid #ccc; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid #eee; padding: 8px 6px; text-align: left; font-size: 13px; }
+    th { font-size: 12px; color: #444; }
+    .muted { color: #666; font-size: 12px; }
+    .mono { font-variant-numeric: tabular-nums; }
+    .tot { font-size: 16px; font-weight: 700; }
+    .pill { display: inline-block; padding: 2px 8px; border: 1px solid #ddd; border-radius: 999px; font-size: 12px; color: #333; }
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <h1>Eclipse-Alliance — калькулятор элементов</h1>
+
+  <div class="card" style="margin-bottom:14px;">
+    <div class="row" style="align-items:center;">
+      <div>
+        <div class="muted">Тип авто (влияет на цели комплекта)</div>
+        <select id="carType"></select>
+      </div>
+      <div>
+        <div class="muted">Комплект</div>
+        <div class="pill" id="kitLabel">—</div>
+      </div>
+      <div style="flex:1"></div>
+      <div class="muted">
+        Скидка плавная: от 0% до полной, пропорционально набору комплекта. Материал без скидки.
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h2>1/ Элементы</h2>
+      <div id="elements"></div>
+    </div>
+
+    <div class="card">
+      <h2>2/ Выбрано</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Элемент</th>
+            <th class="mono">Материал ₽</th>
+            <th class="mono">Время ч</th>
+            <th class="mono">Работа ₽</th>
+          </tr>
+        </thead>
+        <tbody id="chosenTbody"></tbody>
+      </table>
+      <div class="muted" id="chosenEmpty" style="padding-top:8px;">Пока ничего не выбрано.</div>
+    </div>
+
+    <div class="card">
+      <h2>3/ Итоги</h2>
+
+      <div class="split">
+        <div>
+          <div class="muted">Материал (без скидки)</div>
+          <div class="tot mono" id="sumMaterial">0 ₽</div>
+        </div>
+        <div>
+          <div class="muted">Итоговая работа</div>
+          <div class="tot mono" id="sumWork">0 ₽</div>
+          <div class="muted mono" id="workDetails"></div>
+        </div>
+        <div>
+          <div class="muted">Итоговое время</div>
+          <div class="tot mono" id="sumTime">0 ч</div>
+          <div class="muted mono" id="timeDetails"></div>
+        </div>
+        <div>
+          <div class="muted">Общий итог (Материал + Работа)</div>
+          <div class="tot mono" id="sumTotal">0 ₽</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <div class="muted">Статус комплекта</div>
+        <div class="mono" id="kitStatus">—</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // 1/ Данные из твоей таблицы
+  const ELEMENTS = [
+    { id:"kapot", name:"Капот", material:5217, time:2, work:4000 },
+    { id:"bamper", name:"Бампер", material:4000, time:3, work:5000 },
+    { id:"bamper_big", name:"Бампер большой/сложный", material:5217, time:4, work:7000 },
+    { id:"krylya2", name:"Крылья 2 шт.", material:4000, time:2, work:4000 },
+    { id:"polosa_kapot", name:"Полоса на капот", material:522, time:0.5, work:1500 },
+    { id:"fary", name:"Фары", material:522, time:1.5, work:2000 },
+    { id:"fary_big", name:"Фары сложные/большие", material:1043, time:2, work:3000 },
+    { id:"ptf", name:"ПТФ", material:348, time:1, work:1500 },
+    { id:"fary_ptf", name:"Фары + ПТФ", material:870, time:2.5, work:3500 },
+    { id:"zerkala", name:"Зеркала", material:348, time:1.5, work:2000 },
+    { id:"stoyki", name:"Стойки лобового стекла", material:696, time:1, work:2000 },
+    { id:"polosa_krysha", name:"Полоса на крышу", material:870, time:0.5, work:1000 },
+    { id:"pogruzka", name:"Погрузочная зона", material:348, time:0.5, work:1000 },
+    { id:"nishi_ruchki", name:"Ниши под ручками 4 шт", material:348, time:1, work:1500 },
+    { id:"porogi_out", name:"Внешние пороги 2 шт", material:2087, time:2, work:6000 },
+    { id:"porogi_in", name:"Внутренние пороги 4 шт", material:1391, time:2, work:4000 },
+  ];
+
+  // 2/ Определение комплекта (какие элементы входят)
+  const KIT = {
+    id: "kit_main",
+    name: "Фары+ПТФ + Бампер + Крылья + Капот + Стойки + Полоса на крышу + Зеркала + Погрузка",
+    elementIds: ["fary_ptf","bamper","krylya2","kapot","stoyki","polosa_krysha","zerkala","pogruzka"],
+    targets: {
+      sedan:      { material:13217, time:9,  work:20000 },
+      minivan:    { material:13217, time:9,  work:20000 },
+      crossover:  { material:16000, time:9,  work:20000 },
+      suv:        { material:18609, time:10, work:25000 },
+    }
+  };
+
+  const CAR_TYPES = [
+    { id:"sedan", label:"Седан" },
+    { id:"minivan", label:"Минивен" },
+    { id:"crossover", label:"Кроссовер" },
+    { id:"suv", label:"Внедорожник" },
+  ];
+
+  // 3/ Утилиты
+  const fmtRub = (n) => `${Math.round(n).toLocaleString("ru-RU")} ₽`;
+  const fmtHours = (n) => {
+    const v = Math.round(n * 100) / 100;
+    return `${v.toLocaleString("ru-RU")} ч`;
+  };
+
+  const byId = Object.fromEntries(ELEMENTS.map(e => [e.id, e]));
+
+  // 4/ Расчёт баз комплекта
+  const baseKitTime = KIT.elementIds.reduce((s,id)=>s + byId[id].time, 0);
+  const baseKitWork = KIT.elementIds.reduce((s,id)=>s + byId[id].work, 0);
+
+  // 5/ UI рендер
+  const elElements = document.getElementById("elements");
+  const elCarType = document.getElementById("carType");
+  const elKitLabel = document.getElementById("kitLabel");
+  const elChosen = document.getElementById("chosenTbody");
+  const elChosenEmpty = document.getElementById("chosenEmpty");
+
+  const elSumMaterial = document.getElementById("sumMaterial");
+  const elSumWork = document.getElementById("sumWork");
+  const elSumTime = document.getElementById("sumTime");
+  const elSumTotal = document.getElementById("sumTotal");
+  const elWorkDetails = document.getElementById("workDetails");
+  const elTimeDetails = document.getElementById("timeDetails");
+  const elKitStatus = document.getElementById("kitStatus");
+
+  elKitLabel.textContent = KIT.name;
+
+  CAR_TYPES.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.id;
+    opt.textContent = c.label;
+    elCarType.appendChild(opt);
+  });
+
+  // состояние выбранных элементов
+  const selected = new Set();
+
+  function renderElements() {
+    elElements.innerHTML = "";
+    ELEMENTS.forEach(e => {
+      const lab = document.createElement("label");
+      lab.innerHTML = `
+        <input type="checkbox" data-id="${e.id}">
+        <div style="flex:1">
+          <div>${e.name}</div>
+          <div class="muted mono">Материал ${fmtRub(e.material)} · Время ${fmtHours(e.time)} · Работа ${fmtRub(e.work)}</div>
+        </div>
+        ${KIT.elementIds.includes(e.id) ? `<span class="pill">комплект</span>` : ``}
+      `;
+      elElements.appendChild(lab);
+    });
+
+    elElements.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener("change", () => {
+        const id = cb.getAttribute("data-id");
+        if (cb.checked) selected.add(id); else selected.delete(id);
+        recalc();
+      });
+    });
+  }
+
+  function recalc() {
+    const car = elCarType.value;
+    const target = KIT.targets[car];
+
+    // выбранные элементы
+    const chosen = Array.from(selected).map(id => byId[id]);
+
+    // материал всегда по сумме выбранного
+    const sumMaterial = chosen.reduce((s,e)=>s + e.material, 0);
+
+    // разделяем на “внутри комплекта” и “вне комплекта”
+    const chosenKit = chosen.filter(e => KIT.elementIds.includes(e.id));
+    const chosenExtra = chosen.filter(e => !KIT.elementIds.includes(e.id));
+
+    const selectedKitBaseTime = chosenKit.reduce((s,e)=>s + e.time, 0);
+    const selectedKitBaseWork = chosenKit.reduce((s,e)=>s + e.work, 0);
+
+    const extraTime = chosenExtra.reduce((s,e)=>s + e.time, 0);
+    const extraWork = chosenExtra.reduce((s,e)=>s + e.work, 0);
+
+    // коэффициенты (плавные), отдельно для времени и работы
+    const kTimeFull = target.time / baseKitTime;
+    const kWorkFull = target.work / baseKitWork;
+
+    const pTime = baseKitTime > 0 ? (selectedKitBaseTime / baseKitTime) : 0;
+    const pWork = baseKitWork > 0 ? (selectedKitBaseWork / baseKitWork) : 0;
+
+    const kTimeNow = 1 - clamp01(pTime) * (1 - kTimeFull);
+    const kWorkNow = 1 - clamp01(pWork) * (1 - kWorkFull);
+
+    const discountedKitTime = selectedKitBaseTime * kTimeNow;
+    const discountedKitWork = selectedKitBaseWork * kWorkNow;
+
+    const totalTime = discountedKitTime + extraTime;
+    const totalWork = discountedKitWork + extraWork;
+    const total = sumMaterial + totalWork;
+
+    // рендер выбранных
+    elChosen.innerHTML = "";
+    if (chosen.length === 0) {
+      elChosenEmpty.style.display = "block";
+    } else {
+      elChosenEmpty.style.display = "none";
+      chosen.forEach(e => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${e.name}${KIT.elementIds.includes(e.id) ? ` <span class="pill">комплект</span>` : ``}</td>
+          <td class="mono">${fmtRub(e.material)}</td>
+          <td class="mono">${fmtHours(e.time)}</td>
+          <td class="mono">${fmtRub(e.work)}</td>
+        `;
+        elChosen.appendChild(tr);
+      });
+    }
+
+    // итоги
+    elSumMaterial.textContent = fmtRub(sumMaterial);
+    elSumWork.textContent = fmtRub(totalWork);
+    elSumTime.textContent = fmtHours(totalTime);
+    elSumTotal.textContent = fmtRub(total);
+
+    // детали по скидке комплекта
+    const kitWorkSaved = selectedKitBaseWork - discountedKitWork;
+    const kitTimeSaved = selectedKitBaseTime - discountedKitTime;
+
+    elWorkDetails.textContent =
+      chosenKit.length === 0
+        ? `Комплект: 0 ₽`
+        : `Комплект: база ${fmtRub(selectedKitBaseWork)} → ${fmtRub(discountedKitWork)} (скидка ${fmtRub(kitWorkSaved)}, k=${(Math.round(kWorkNow*10000)/10000).toLocaleString("ru-RU")})`;
+
+    elTimeDetails.textContent =
+      chosenKit.length === 0
+        ? `Комплект: 0 ч`
+        : `Комплект: база ${fmtHours(selectedKitBaseTime)} → ${fmtHours(discountedKitTime)} (экономия ${fmtHours(kitTimeSaved)}, k=${(Math.round(kTimeNow*10000)/10000).toLocaleString("ru-RU")})`;
+
+    // статус набора комплекта
+    const kitCount = KIT.elementIds.length;
+    const selectedKitCount = chosenKit.length;
+    const isFullKit = selectedKitCount === kitCount;
+
+    elKitStatus.textContent =
+      `Набрано элементов комплекта: ${selectedKitCount}/${kitCount}. ` +
+      `Цель для "${CAR_TYPES.find(x=>x.id===car).label}": время ${target.time} ч, работа ${fmtRub(target.work)}.` +
+      (isFullKit ? ` Полный комплект: сходится 1:1.` : ``);
+  }
+
+  function clamp01(x) { return Math.max(0, Math.min(1, x)); }
+
+  elCarType.addEventListener("change", recalc);
+
+  renderElements();
+  elCarType.value = "sedan";
+  recalc();
+})();
+</script>
+</body>
+</html>

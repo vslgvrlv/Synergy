@@ -14,8 +14,6 @@
       --line:rgba(255,255,255,.10);
       --good:#32d583;
       --bad:#ff6b6b;
-      --warn:#ffcc66;
-      --chip:#1a2550;
 
       --c-supplier:#7aa7ff;
       --c-gov:#ffd1d1;
@@ -149,9 +147,7 @@
     .mono{font-variant-numeric: tabular-nums}
 
     /* Visualization */
-    .vizCard{
-      padding:16px;
-    }
+    .vizCard{padding:16px}
     .vizHeader{
       display:flex;
       justify-content:space-between;
@@ -261,9 +257,7 @@
       gap:8px;
       align-items:center;
     }
-    .pill{
-      width:10px;height:10px;border-radius:3px;background:#fff;opacity:.9;
-    }
+    .pill{width:10px;height:10px;border-radius:3px;background:#fff;opacity:.9}
 
     .small{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.35}
 
@@ -293,8 +287,7 @@
   <div class="wrap">
     <h1>Corona Import — калькулятор/дашборд</h1>
     <div class="sub">
-      Логика: считаем P&L «без НДС». Выручка = цена X5 без НДС. Далее вычитаем гос.платежи, наши расходы и цену поставщика.
-      Визуализация: кликай сегменты/плитки — подсветится соответствующий ввод слева.
+      P&L считается «без НДС». Hover = подсветка+tooltip (без скролла). Click = перейти к вводу (скролл+фокус).
     </div>
 
     <div class="grid">
@@ -304,7 +297,7 @@
 
         <div class="row" data-row="sellPriceVat"><label>Цена продажи X5 (₽/бут, с НДС)</label>
           <input id="sellPriceVat" type="number" step="0.01" value="100"></div>
-        <div class="row" data-row="vatRate"><label>НДС (доля, напр. 0.22)</label>
+        <div class="row" data-row="vatRate"><label>НДС (доля)</label>
           <input id="vatRate" type="number" step="0.001" value="0.22"></div>
 
         <div class="row" data-row="bottlesPerContainer"><label>Бутылок в контейнере 40ft</label>
@@ -317,7 +310,7 @@
 
         <div class="row" data-row="targetNetProfitYear"><label>Целевая ЧП (₽/год)</label>
           <input id="targetNetProfitYear" type="number" step="1000000" value="300000000"></div>
-        <div class="row" data-row="profitTaxRate"><label>Налог на прибыль (доля, напр. 0.25)</label>
+        <div class="row" data-row="profitTaxRate"><label>Налог на прибыль (доля)</label>
           <input id="profitTaxRate" type="number" step="0.001" value="0.25"></div>
 
         <div class="hr"></div>
@@ -355,7 +348,7 @@
         <div class="row" data-row="inlandRubPerContainer"><label>Внутр. логистика до склада X5 (₽/конт)</label>
           <input id="inlandRubPerContainer" type="number" step="1000" value="52000"></div>
 
-        <div class="row" data-row="customsFeeRubPerContainer"><label>Таможенный сбор (₽/ДТ/конт)</label>
+        <div class="row" data-row="customsFeeRubPerContainer"><label>Таможенный сбор (₽/конт)</label>
           <input id="customsFeeRubPerContainer" type="number" step="1000" value="12000"></div>
         <div class="row" data-row="brokerFeeRubPerContainer"><label>Брокер (₽/конт)</label>
           <input id="brokerFeeRubPerContainer" type="number" step="1000" value="15000"></div>
@@ -389,7 +382,7 @@
         </div>
 
         <div class="help">
-          Подсказка: клик по сегменту/плитке — подсветка полей ввода. Hover — абсолюты на бутылку/конт/мес/год.
+          Hover на визуализации — подсветка и подсказка. Click — закрепление и переход к нужным полям ввода.
         </div>
       </div>
 
@@ -401,8 +394,7 @@
             <div class="left">
               <h2>Визуализация цены (главное)</h2>
               <p class="note">
-                Это расклад цены «без НДС» по выбранному термину цены поставщика (<span class="mono" id="outTerm">—</span>).
-                Если прибыль отрицательная — сегмент «Убыток» покажет дефицит.
+                Расклад цены «без НДС» по термину поставщика (<span class="mono" id="outTerm">—</span>).
               </p>
             </div>
             <div class="selBox" id="selBox">
@@ -425,7 +417,7 @@
               <div class="lg"><span class="dot" style="background:var(--c-log)"></span>Логистика/таможня</div>
               <div class="lg"><span class="dot" style="background:var(--c-ops)"></span>Маркировка/операции</div>
               <div class="lg"><span class="dot" style="background:var(--c-profit)"></span>Прибыль до налога</div>
-              <div class="lg"><span class="dot" style="background:var(--c-loss)"></span>Убыток (дефицит)</div>
+              <div class="lg"><span class="dot" style="background:var(--c-loss)"></span>Убыток</div>
             </div>
 
             <div class="small" id="mainBarText">—</div>
@@ -433,7 +425,7 @@
             <div class="hr"></div>
             <div class="sectionTitle">Детализация (кликабельные элементы)</div>
             <div class="detailGrid" id="detailGrid"></div>
-            <div class="small">Смысл: плитки — точка управления. Жмёшь на “Маркировка”, “THC”, “Брокер” и т.д. и правишь ввод слева.</div>
+            <div class="small">Hover = подсветка/tooltip. Click = закрепить и перейти к вводу.</div>
           </div>
         </div>
 
@@ -445,17 +437,17 @@
             <div class="k">
               <div class="t">Цена продажи без НДС (₽/бут)</div>
               <div class="v mono" id="outSellExVat">—</div>
-              <div class="s">Используется для P&L</div>
+              <div class="s">P&L</div>
             </div>
             <div class="k">
               <div class="t">Годовой объём (бут / конт)</div>
               <div class="v mono" id="outVolumeYear">—</div>
-              <div class="s">12 месяцев</div>
+              <div class="s">12 мес</div>
             </div>
             <div class="k">
               <div class="t">Треб. прибыль до налога (₽/бут)</div>
               <div class="v mono" id="outTargetPBTPerBottle">—</div>
-              <div class="s">Чтобы получить целевую ЧП</div>
+              <div class="s">под цель ЧП</div>
             </div>
             <div class="k">
               <div class="t">Статус к цели (ЧП/год)</div>
@@ -471,7 +463,7 @@
             <thead>
               <tr>
                 <th>Термин</th>
-                <th>Макс. цена поставщика</th>
+                <th>Макс. цена</th>
                 <th>Что оплачиваем сверху</th>
               </tr>
             </thead>
@@ -501,8 +493,8 @@
             <thead>
               <tr>
                 <th>Показатель</th>
-                <th>На бутылку</th>
-                <th>На контейнер</th>
+                <th>На бут</th>
+                <th>На конт</th>
                 <th>На год</th>
               </tr>
             </thead>
@@ -514,7 +506,7 @@
                 <td class="mono" id="revYear">—</td>
               </tr>
               <tr>
-                <td>Себестоимость (все блоки)</td>
+                <td>Себестоимость</td>
                 <td class="mono" id="costBottle">—</td>
                 <td class="mono" id="costCont">—</td>
                 <td class="mono" id="costYear">—</td>
@@ -535,30 +527,26 @@
           </table>
 
           <div class="hr"></div>
-
-          <div class="sectionTitle">Описание переменных (легенда)</div>
+          <div class="sectionTitle">Легенда переменных</div>
           <table class="table">
-            <thead>
-              <tr><th>Переменная</th><th>Смысл</th><th>Где влияет</th></tr>
-            </thead>
+            <thead><tr><th>Переменная</th><th>Смысл</th></tr></thead>
             <tbody>
-              <tr><td class="mono">sellPriceVat, vatRate</td><td>Цена X5 “с НДС” и ставка НДС</td><td>Перевод в выручку без НДС</td></tr>
-              <tr><td class="mono">bottlesPerContainer, containersPerMonth</td><td>Упаковка и объём</td><td>Все пересчёты в “на конт/на год”</td></tr>
-              <tr><td class="mono">targetNetProfitYear, profitTaxRate</td><td>Целевая ЧП и налог на прибыль</td><td>Требуемая прибыль до налога на 1 бутылку</td></tr>
-              <tr><td class="mono">exciseRubPerLiter, bottleLiters</td><td>Акциз на литр и литраж</td><td>Гос.платеж на 1 бутылку</td></tr>
-              <tr><td class="mono">dutyEurPerLiter, eurRub</td><td>Пошлина в €/л и курс</td><td>Гос.платеж на 1 бутылку</td></tr>
-              <tr><td class="mono">czCodeRub</td><td>Стоимость кода ЧЗ (без НДС)</td><td>Гос/комплаенс на 1 бутылку</td></tr>
-              <tr><td class="mono">originRubPerContainer</td><td>Origin/local (EXW→FOB)</td><td>Оплачиваем только при EXW</td></tr>
-              <tr><td class="mono">oceanRubPerContainer, insuranceRubPerContainer</td><td>Океан + страховка</td><td>Оплачиваем при EXW/FOB; включено в цену при CIF</td></tr>
-              <tr><td class="mono">destPortUsdPerContainer, usdRub</td><td>Портовые/THC (RF)</td><td>Оплачиваем всегда</td></tr>
-              <tr><td class="mono">inlandRubPerContainer</td><td>Доставка по РФ до склада X5</td><td>Оплачиваем всегда</td></tr>
-              <tr><td class="mono">customsFeeRubPerContainer, brokerFeeRubPerContainer</td><td>Таможенный сбор + брокер</td><td>Оплачиваем всегда</td></tr>
-              <tr><td class="mono">markingServiceRubPerBottle</td><td>Маркировка как услуга</td><td>Главный рычаг маржи</td></tr>
-              <tr><td class="mono">egaisOpsRubPerBottle, otherOpsRubPerBottle</td><td>ЕГАИС/ИТ/операции + прочее</td><td>Моделирование “аутсорс vs свои процессы”</td></tr>
-              <tr><td class="mono">supplierTerm, supplierPriceRubPerBottle</td><td>Термин и цена поставщика</td><td>Сценарный расчёт прибыли и потолка</td></tr>
+              <tr><td class="mono">sellPriceVat, vatRate</td><td>Цена X5 с НДС и ставка НДС</td></tr>
+              <tr><td class="mono">bottlesPerContainer, containersPerMonth</td><td>Упаковка и объём</td></tr>
+              <tr><td class="mono">targetNetProfitYear, profitTaxRate</td><td>Цель ЧП и ставка налога на прибыль</td></tr>
+              <tr><td class="mono">exciseRubPerLiter, bottleLiters</td><td>Акциз и литраж</td></tr>
+              <tr><td class="mono">dutyEurPerLiter, eurRub</td><td>Пошлина и курс EUR</td></tr>
+              <tr><td class="mono">czCodeRub</td><td>Код Честного знака</td></tr>
+              <tr><td class="mono">originRubPerContainer</td><td>Origin/local для EXW</td></tr>
+              <tr><td class="mono">oceanRubPerContainer, insuranceRubPerContainer</td><td>Океан и страховка</td></tr>
+              <tr><td class="mono">destPortUsdPerContainer, usdRub</td><td>Порт РФ (THC) и курс USD</td></tr>
+              <tr><td class="mono">inlandRubPerContainer</td><td>Логистика РФ</td></tr>
+              <tr><td class="mono">customsFeeRubPerContainer, brokerFeeRubPerContainer</td><td>Тамож. сбор и брокер</td></tr>
+              <tr><td class="mono">markingServiceRubPerBottle</td><td>Маркировка как услуга</td></tr>
+              <tr><td class="mono">egaisOpsRubPerBottle, otherOpsRubPerBottle</td><td>ЕГАИС/операции и прочее</td></tr>
+              <tr><td class="mono">supplierTerm, supplierPriceRubPerBottle</td><td>Термин и цена поставщика</td></tr>
             </tbody>
           </table>
-
         </div>
       </div>
     </div>
@@ -594,8 +582,7 @@
     supplierPriceRubPerBottle: 0.00
   };
 
-  let pinnedKey = null;   // clicked item is pinned
-  let activeKey = null;   // currently active (hover/click)
+  let pinnedKey = null; // clicked element is pinned
 
   function num(v){ return Number(v || 0); }
   function fmt(n, digits=2){
@@ -619,6 +606,58 @@
       else data[id] = num(el.value);
     }
     return data;
+  }
+
+  function clearHighlights(){
+    document.querySelectorAll(".row").forEach(r => r.classList.remove("active"));
+    document.querySelectorAll(".tile").forEach(t => t.classList.remove("active"));
+  }
+
+  const keyToInputs = {
+    supplier_total: ["supplierPriceRubPerBottle","supplierTerm"],
+    gov_total: ["exciseRubPerLiter","dutyEurPerLiter","eurRub","czCodeRub","bottleLiters"],
+    log_total: ["originRubPerContainer","oceanRubPerContainer","insuranceRubPerContainer","destPortUsdPerContainer","usdRub","inlandRubPerContainer","customsFeeRubPerContainer","brokerFeeRubPerContainer"],
+    ops_total: ["markingServiceRubPerBottle","egaisOpsRubPerBottle","otherOpsRubPerBottle"],
+    profit: ["targetNetProfitYear","profitTaxRate"],
+    loss: ["targetNetProfitYear","profitTaxRate"],
+
+    excise: ["exciseRubPerLiter","bottleLiters"],
+    duty: ["dutyEurPerLiter","eurRub","bottleLiters"],
+    czcode: ["czCodeRub"],
+
+    origin: ["originRubPerContainer","supplierTerm"],
+    ocean: ["oceanRubPerContainer","supplierTerm"],
+    insurance: ["insuranceRubPerContainer","supplierTerm"],
+    destPort: ["destPortUsdPerContainer","usdRub"],
+    inland: ["inlandRubPerContainer"],
+    customsFee: ["customsFeeRubPerContainer"],
+    broker: ["brokerFeeRubPerContainer"],
+
+    marking: ["markingServiceRubPerBottle"],
+    egais: ["egaisOpsRubPerBottle"],
+    otherOps: ["otherOpsRubPerBottle"],
+
+    supplier: ["supplierPriceRubPerBottle","supplierTerm"]
+  };
+
+  // mode: "hover" = highlight only; "click" = highlight + focus + scroll
+  function highlightInputsForKey(key, mode = "hover"){
+    clearHighlights();
+    const ids = keyToInputs[key] || [];
+    if (!ids.length) return;
+
+    ids.forEach(id=>{
+      const row = document.querySelector(`.row[data-row="${id}"]`);
+      if (row) row.classList.add("active");
+    });
+
+    if (mode === "click"){
+      const first = $(ids[0]);
+      if (first && (first.tagName === "INPUT" || first.tagName === "SELECT")){
+        first.focus({preventScroll:true});
+        first.scrollIntoView({behavior:"smooth", block:"center"});
+      }
+    }
   }
 
   function payableCostsPerBottle(term, inp){
@@ -683,8 +722,21 @@
     };
   }
 
-  function setSelection(key, label, valPerBottle, inp){
-    activeKey = key;
+  function tooltipHtml(label, valPerBottle, inp){
+    const a = absPack(valPerBottle, inp);
+    return `
+      <div class="h">${label}</div>
+      <div class="m mono">
+        на бут: <b>${fmt(a.bottle,2)} ₽</b><br>
+        на конт: <b>${fmt(a.cont,0)} ₽</b><br>
+        на мес: <b>${fmt(a.month,0)} ₽</b><br>
+        на год: <b>${fmt(a.year,0)} ₽</b>
+      </div>
+    `;
+  }
+
+  // mode: hover/click
+  function setSelection(key, label, valPerBottle, inp, mode="hover"){
     const a = absPack(valPerBottle, inp);
     $("selName").textContent = label;
     $("selVals").innerHTML =
@@ -693,66 +745,13 @@
       `на мес: <b>${fmt(a.month,0)} ₽</b><br>` +
       `на год: <b>${fmt(a.year,0)} ₽</b>`;
 
-    // tile highlight
+    // tiles highlight
     document.querySelectorAll(".tile").forEach(t => t.classList.remove("active"));
     const tile = document.querySelector(`.tile[data-key="${key}"]`);
     if (tile) tile.classList.add("active");
 
-    // input highlight
-    highlightInputsForKey(key);
-  }
-
-  function clearHighlights(){
-    document.querySelectorAll(".row").forEach(r => r.classList.remove("active"));
-    document.querySelectorAll(".tile").forEach(t => t.classList.remove("active"));
-  }
-
-  const keyToInputs = {
-    // main groups
-    revenue: ["sellPriceVat","vatRate"],
-    supplier_total: ["supplierPriceRubPerBottle","supplierTerm"],
-    gov_total: ["exciseRubPerLiter","dutyEurPerLiter","eurRub","czCodeRub","bottleLiters"],
-    log_total: ["originRubPerContainer","oceanRubPerContainer","insuranceRubPerContainer","destPortUsdPerContainer","usdRub","inlandRubPerContainer","customsFeeRubPerContainer","brokerFeeRubPerContainer"],
-    ops_total: ["markingServiceRubPerBottle","egaisOpsRubPerBottle","otherOpsRubPerBottle"],
-    profit_target: ["targetNetProfitYear","profitTaxRate"],
-
-    // detail tiles
-    excise: ["exciseRubPerLiter","bottleLiters"],
-    duty: ["dutyEurPerLiter","eurRub","bottleLiters"],
-    czcode: ["czCodeRub"],
-    origin: ["originRubPerContainer","supplierTerm"],
-    ocean: ["oceanRubPerContainer","supplierTerm"],
-    insurance: ["insuranceRubPerContainer","supplierTerm"],
-    destPort: ["destPortUsdPerContainer","usdRub"],
-    inland: ["inlandRubPerContainer"],
-    customsFee: ["customsFeeRubPerContainer"],
-    broker: ["brokerFeeRubPerContainer"],
-    marking: ["markingServiceRubPerBottle"],
-    egais: ["egaisOpsRubPerBottle"],
-    otherOps: ["otherOpsRubPerBottle"],
-    supplier: ["supplierPriceRubPerBottle","supplierTerm"],
-    profit: ["targetNetProfitYear","profitTaxRate"],
-    loss: ["targetNetProfitYear","profitTaxRate"]
-  };
-
-  function highlightInputsForKey(key){
-    clearHighlights();
-    const ids = keyToInputs[key] || [];
-    if (!ids.length) return;
-
-    // highlight rows by matching data-row attribute
-    const seenRows = new Set();
-    ids.forEach(id=>{
-      const row = document.querySelector(`.row[data-row="${id}"]`);
-      if (row){ row.classList.add("active"); seenRows.add(row); }
-    });
-
-    // focus first input
-    const first = $(ids[0]);
-    if (first && (first.tagName === "INPUT" || first.tagName === "SELECT")){
-      first.focus({preventScroll:true});
-      first.scrollIntoView({behavior:"smooth", block:"center"});
-    }
+    // inputs highlight: no scroll on hover
+    highlightInputsForKey(key, mode);
   }
 
   function buildMainBar(segments, sellExVat, inp){
@@ -765,6 +764,7 @@
     segments.forEach(seg=>{
       const w = toPct(seg.value);
       if (w <= 0) return;
+
       const s = document.createElement("span");
       s.className = "seg";
       s.tabIndex = 0;
@@ -773,19 +773,23 @@
       s.dataset.key = seg.key;
 
       const tipHtml = tooltipHtml(seg.label, seg.value, inp);
+
+      // Hover: tooltip + highlight only
       s.addEventListener("mousemove", (e)=> setTooltip(true, e.clientX, e.clientY, tipHtml));
       s.addEventListener("mouseleave", ()=> { if (!pinnedKey) setTooltip(false); });
-
       s.addEventListener("mouseenter", ()=>{
-        if (!pinnedKey) setSelection(seg.key, seg.label, seg.value, inp);
+        if (!pinnedKey) setSelection(seg.key, seg.label, seg.value, inp, "hover");
       });
 
+      // Click: pin + go to inputs (scroll)
       s.addEventListener("click", ()=>{
-        pinnedKey = (pinnedKey === seg.key) ? null : seg.key;
-        if (pinnedKey){
-          setSelection(seg.key, seg.label, seg.value, inp);
+        const wasPinned = (pinnedKey === seg.key);
+        pinnedKey = wasPinned ? null : seg.key;
+
+        if (!wasPinned){
+          setSelection(seg.key, seg.label, seg.value, inp, "click");
         } else {
-          // unpinned: keep current selection text but remove pin behavior
+          setSelection(seg.key, seg.label, seg.value, inp, "hover");
         }
       });
 
@@ -798,19 +802,6 @@
 
       bar.appendChild(s);
     });
-  }
-
-  function tooltipHtml(label, valPerBottle, inp){
-    const a = absPack(valPerBottle, inp);
-    return `
-      <div class="h">${label}</div>
-      <div class="m mono">
-        на бут: <b>${fmt(a.bottle,2)} ₽</b><br>
-        на конт: <b>${fmt(a.cont,0)} ₽</b><br>
-        на мес: <b>${fmt(a.month,0)} ₽</b><br>
-        на год: <b>${fmt(a.year,0)} ₽</b>
-      </div>
-    `;
   }
 
   function buildTiles(items, inp){
@@ -829,16 +820,23 @@
       `;
 
       const tip = tooltipHtml(it.label, it.value, inp);
+
+      // Hover: tooltip + highlight only
       tile.addEventListener("mousemove", (e)=> setTooltip(true, e.clientX, e.clientY, tip));
       tile.addEventListener("mouseleave", ()=> { if (!pinnedKey) setTooltip(false); });
-
       tile.addEventListener("mouseenter", ()=>{
-        if (!pinnedKey) setSelection(it.key, it.label, it.value, inp);
+        if (!pinnedKey) setSelection(it.key, it.label, it.value, inp, "hover");
       });
+
+      // Click: pin + go to inputs (scroll)
       tile.addEventListener("click", ()=>{
-        pinnedKey = (pinnedKey === it.key) ? null : it.key;
-        if (pinnedKey){
-          setSelection(it.key, it.label, it.value, inp);
+        const wasPinned = (pinnedKey === it.key);
+        pinnedKey = wasPinned ? null : it.key;
+
+        if (!wasPinned){
+          setSelection(it.key, it.label, it.value, inp, "click");
+        } else {
+          setSelection(it.key, it.label, it.value, inp, "hover");
         }
       });
 
@@ -931,18 +929,16 @@
     const logSeg = { key:"log_total", label:"Логистика/таможня (итого)", value: Math.max(0, paySel.logTotal), color:"var(--c-log)" };
     const opsSeg = { key:"ops_total", label:"Маркировка/операции (итого)", value: Math.max(0, paySel.opsTotal), color:"var(--c-ops)" };
 
-    const profitVal = pbtBottle;
-    const profitSeg = profitVal >= 0
-      ? { key:"profit", label:"Прибыль до налога", value: profitVal, color:"var(--c-profit)" }
-      : { key:"loss", label:"Убыток (дефицит)", value: -profitVal, color:"var(--c-loss)" };
+    const profitSeg = pbtBottle >= 0
+      ? { key:"profit", label:"Прибыль до налога", value: pbtBottle, color:"var(--c-profit)" }
+      : { key:"loss", label:"Убыток (дефицит)", value: -pbtBottle, color:"var(--c-loss)" };
 
     buildMainBar([supplierSeg, govSeg, logSeg, opsSeg, profitSeg], sellExVat, inp);
 
     $("mainBarText").textContent =
-      `Выручка без НДС: ${fmt(sellExVat,2)} ₽/бут. Себестоимость: ${fmt(totalCostBottle,2)} ₽/бут. ` +
-      `PBT: ${fmt(pbtBottle,2)} ₽/бут.`;
+      `Выручка без НДС: ${fmt(sellExVat,2)} ₽/бут. Себестоимость: ${fmt(totalCostBottle,2)} ₽/бут. PBT: ${fmt(pbtBottle,2)} ₽/бут.`;
 
-    // Detail tiles (component-level)
+    // Detail tiles
     const tiles = [];
 
     // GOV
@@ -964,30 +960,21 @@
     tiles.push({ key:"egais", group:"Маркировка/операции", label:"ЕГАИС/операции", value: paySel.egais, color:"var(--c-ops)" });
     tiles.push({ key:"otherOps", group:"Маркировка/операции", label:"Прочие операции", value: paySel.otherOps, color:"var(--c-ops)" });
 
-    // Supplier & Profit (detail)
+    // Supplier & Profit
     tiles.push({ key:"supplier", group:"Поставщик", label:"Цена поставщика", value: supplier, color:"var(--c-supplier)" });
-    tiles.push({ key: (profitVal>=0 ? "profit":"loss"), group:"Прибыль", label:(profitVal>=0 ? "PBT (прибыль)":"PBT (убыток)"), value: Math.abs(profitVal), color:(profitVal>=0 ? "var(--c-profit)":"var(--c-loss)") });
+    tiles.push({ key:(pbtBottle>=0 ? "profit":"loss"), group:"Прибыль", label:(pbtBottle>=0 ? "PBT (прибыль)":"PBT (убыток)"), value: Math.abs(pbtBottle), color:(pbtBottle>=0 ? "var(--c-profit)":"var(--c-loss)") });
 
     buildTiles(tiles, inp);
 
-    // keep selection box consistent if pinned
+    // IMPORTANT: do NOT scroll on recalculation. If pinned, keep selection in hover-mode.
     if (pinnedKey){
-      // try to find pinned in tiles or bar segments:
       const found = tiles.find(t=>t.key===pinnedKey);
       if (found){
-        setSelection(found.key, found.label, found.value, inp);
+        setSelection(found.key, found.label, found.value, inp, "hover");
       } else {
-        // group segments
-        const map = {
-          supplier_total: supplierSeg,
-          gov_total: govSeg,
-          log_total: logSeg,
-          ops_total: opsSeg,
-          profit: profitSeg,
-          loss: profitSeg
-        };
+        const map = { supplier_total:supplierSeg, gov_total:govSeg, log_total:logSeg, ops_total:opsSeg, profit:profitSeg, loss:profitSeg };
         const g = map[pinnedKey];
-        if (g) setSelection(g.key, g.label, g.value, inp);
+        if (g) setSelection(g.key, g.label, g.value, inp, "hover");
       }
     }
   }
@@ -1005,7 +992,6 @@
         else el.value = v;
       }
       pinnedKey = null;
-      activeKey = null;
       $("selName").textContent = "—";
       $("selVals").textContent = "Наведись или кликни по сегменту/плитке";
       setTooltip(false);
@@ -1015,12 +1001,12 @@
 
     $("btnSave").addEventListener("click", ()=>{
       const data = getInputs();
-      localStorage.setItem("corona_dash_inputs_v2", JSON.stringify(data));
+      localStorage.setItem("corona_dash_inputs_v3", JSON.stringify(data));
       alert("Сохранено в браузере (localStorage).");
     });
 
     $("btnLoad").addEventListener("click", ()=>{
-      const raw = localStorage.getItem("corona_dash_inputs_v2");
+      const raw = localStorage.getItem("corona_dash_inputs_v3");
       if (!raw) { alert("Нет сохранённых данных."); return; }
       const data = JSON.parse(raw);
       for (const [k,v] of Object.entries(data)){
@@ -1030,7 +1016,6 @@
         else el.value = v;
       }
       pinnedKey = null;
-      activeKey = null;
       $("selName").textContent = "—";
       $("selVals").textContent = "Наведись или кликни по сегменту/плитке";
       setTooltip(false);
@@ -1040,14 +1025,12 @@
 
     $("btnClearSel").addEventListener("click", ()=>{
       pinnedKey = null;
-      activeKey = null;
       $("selName").textContent = "—";
       $("selVals").textContent = "Наведись или кликни по сегменту/плитке";
       setTooltip(false);
       clearHighlights();
     });
 
-    // hide tooltip when leaving window
     window.addEventListener("scroll", ()=> { if (!pinnedKey) setTooltip(false); });
   }
 

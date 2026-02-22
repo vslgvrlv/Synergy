@@ -2,268 +2,661 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Импорт пива 0,33 — калькулятор (до порта РФ)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Corona Import — Unit Economics Dashboard</title>
   <style>
-    :root { --b:#e5e7eb; --t:#111827; --m:#6b7280; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color:var(--t); margin:20px; }
-    h1 { font-size:18px; margin:0 0 12px; }
-    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:14px; align-items:start; }
-    .card { border:1px solid var(--b); border-radius:12px; padding:14px; }
-    .card h2 { font-size:14px; margin:0 0 10px; }
-    label { display:flex; justify-content:space-between; gap:10px; align-items:center; padding:6px 0; border-bottom:1px dashed #f0f2f5; }
-    label:last-child { border-bottom:none; }
-    input, select { width:170px; padding:8px 10px; border:1px solid var(--b); border-radius:10px; font-size:14px; }
-    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .hint { color:var(--m); font-size:12px; line-height:1.35; margin-top:8px; }
-    table { width:100%; border-collapse:collapse; font-size:14px; }
-    td { padding:8px 0; border-bottom:1px solid #f0f2f5; }
-    td:last-child { text-align:right; font-variant-numeric: tabular-nums; }
-    .kpi { font-weight:700; }
-    .btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
-    button { padding:10px 12px; border-radius:10px; border:1px solid var(--b); background:#fff; cursor:pointer; }
-    button:hover { background:#f9fafb; }
-    .mono { font-variant-numeric: tabular-nums; }
+    :root{
+      --bg:#0b1020;
+      --card:#121a33;
+      --card2:#0f1730;
+      --text:#e7ecff;
+      --muted:#aab3d7;
+      --line:rgba(255,255,255,.10);
+      --good:#32d583;
+      --bad:#ff6b6b;
+      --warn:#ffcc66;
+      --chip:#1a2550;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 15% 10%, #14204a 0%, var(--bg) 55%);
+      color:var(--text);
+    }
+    .wrap{max-width:1280px;margin:0 auto;padding:20px}
+    h1{margin:0 0 8px;font-size:20px;font-weight:750}
+    .sub{color:var(--muted);font-size:13px;line-height:1.35;margin-bottom:14px}
+    .grid{
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap:14px;
+    }
+    @media (max-width: 1020px){
+      .grid{grid-template-columns:1fr}
+    }
+    .card{
+      background: linear-gradient(180deg, var(--card) 0%, var(--card2) 100%);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.22);
+    }
+    .card h2{
+      margin:0 0 10px;
+      font-size:14px;
+      letter-spacing:.2px;
+      color:#f2f4ff;
+    }
+    .row{display:flex;gap:10px;align-items:center;margin:8px 0}
+    .row label{flex:1;color:var(--muted);font-size:12px}
+    .row input, .row select{
+      width:170px;
+      background:#0b1430;
+      border:1px solid var(--line);
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:10px;
+      outline:none;
+      font-size:13px;
+    }
+    .row input:focus, .row select:focus{border-color:rgba(255,255,255,.25)}
+    .help{color:var(--muted);font-size:11px;line-height:1.35;margin-top:8px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .chip{
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      padding:6px 8px;
+      border-radius:999px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .split{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+    }
+    @media (max-width: 1020px){
+      .split{grid-template-columns:1fr}
+    }
+    .kpi{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+    }
+    @media (max-width: 1020px){
+      .kpi{grid-template-columns:1fr}
+    }
+    .k{
+      padding:10px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+    }
+    .k .t{color:var(--muted);font-size:12px;margin-bottom:6px}
+    .k .v{font-size:18px;font-weight:800}
+    .k .s{color:var(--muted);font-size:12px;margin-top:4px}
+    .ok{color:var(--good)}
+    .bad{color:var(--bad)}
+    .warn{color:var(--warn)}
+    .sectionTitle{margin:0 0 8px;font-size:13px;color:#f2f4ff;font-weight:750}
+    .table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+    }
+    .table th, .table td{
+      padding:10px 10px;
+      border-bottom:1px solid var(--line);
+      font-size:12px;
+      text-align:left;
+      vertical-align:top;
+    }
+    .table th{color:var(--muted);font-weight:700;background:rgba(255,255,255,.03)}
+    .table tr:last-child td{border-bottom:none}
+    .mono{font-variant-numeric: tabular-nums}
+    .barWrap{
+      margin-top:10px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px;
+      background:rgba(255,255,255,.03);
+    }
+    .bar{
+      height:16px;
+      width:100%;
+      background:rgba(255,255,255,.06);
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .seg{height:100%;display:inline-block}
+    .legend{
+      display:flex;flex-wrap:wrap;gap:10px;margin-top:10px
+    }
+    .lg{
+      display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)
+    }
+    .dot{width:10px;height:10px;border-radius:3px;background:#fff;opacity:.85}
+    .small{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.35}
+    .hr{height:1px;background:var(--line);margin:12px 0}
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    button{
+      background:#0b1430;
+      color:var(--text);
+      border:1px solid var(--line);
+      padding:8px 10px;
+      border-radius:12px;
+      cursor:pointer;
+      font-size:12px;
+    }
+    button:hover{border-color:rgba(255,255,255,.25)}
   </style>
 </head>
 <body>
-  <h1>Импорт пива 0,33 (до порта РФ): пошлина + акциз + НДС + логистика/сервисы</h1>
-
-  <div class="grid">
-    <div class="card">
-      <h2>Вводные</h2>
-
-      <label>
-        <span>Контейнеров</span>
-        <input id="containers" type="number" step="1" value="30">
-      </label>
-
-      <label>
-        <span>Паллет в контейнере</span>
-        <input id="palletsPerContainer" type="number" step="1" value="24">
-      </label>
-
-      <label>
-        <span>Коробок на паллете</span>
-        <select id="casesPerPallet">
-          <option value="80" selected>80 (реалистично)</option>
-          <option value="99">99</option>
-        </select>
-      </label>
-
-      <label>
-        <span>Бутылок в коробке</span>
-        <input id="bottlesPerCase" type="number" step="1" value="24">
-      </label>
-
-      <label>
-        <span>Объём бутылки (л)</span>
-        <input id="bottleL" type="number" step="0.01" value="0.33">
-      </label>
-
-      <hr style="border:none;border-top:1px solid var(--b); margin:12px 0;">
-
-      <label>
-        <span>Таможенная стоимость, ₽/бут<br><span class="hint">FOB + freight + insurance (CIF логика)</span></span>
-        <input id="customsValuePerBottle" type="number" step="0.01" value="50">
-      </label>
-
-      <label>
-        <span>Фрахт, ₽/контейнер<br><span class="hint">если хочешь отдельно. будет распределён по бутылкам</span></span>
-        <input id="freightPerContainer" type="number" step="1" value="0">
-      </label>
-
-      <label>
-        <span>THC/терминал/порты, ₽/конт</span>
-        <input id="thcPerContainer" type="number" step="1" value="0">
-      </label>
-
-      <label>
-        <span>Документы/брокер, ₽/конт</span>
-        <input id="brokerPerContainer" type="number" step="1" value="0">
-      </label>
-
-      <div class="hint">
-        Если ты уже включил фрахт в “таможенную стоимость ₽/бут”, ставь “фрахт ₽/конт = 0”, чтобы не задвоить.
-      </div>
-
-      <div class="btns">
-        <button id="resetBtn" type="button">Сброс к дефолту</button>
-        <button id="exampleBtn" type="button">Пример: фрахт/THC/брокер</button>
-      </div>
+  <div class="wrap">
+    <h1>Corona Import — калькулятор/дашборд</h1>
+    <div class="sub">
+      Логика: переводим цену продажи в "без НДС", вычитаем целевую прибыль до налога, фиксированные гос.платежи и наши расходы.
+      На выходе: факт-прибыль + потолок цены поставщика (EXW/FOB/CIF).
     </div>
 
-    <div class="card">
-      <h2>Налоги и курсы</h2>
+    <div class="grid">
+      <!-- INPUTS -->
+      <div class="card">
+        <h2>1) Вводные</h2>
 
-      <label>
-        <span>Акциз, ₽/л</span>
-        <input id="exciseRubPerL" type="number" step="0.01" value="33">
-      </label>
+        <div class="row"><label>Цена продажи X5 (₽/бут, с НДС)</label>
+          <input id="sellPriceVat" type="number" step="0.01" value="100"></div>
+        <div class="row"><label>НДС (доля, напр. 0.22)</label>
+          <input id="vatRate" type="number" step="0.001" value="0.22"></div>
 
-      <label>
-        <span>Пошлина, €/л</span>
-        <input id="dutyEurPerL" type="number" step="0.0001" value="0.018">
-      </label>
+        <div class="row"><label>Бутылок в контейнере 40ft</label>
+          <input id="bottlesPerContainer" type="number" step="1" value="46080"></div>
+        <div class="row"><label>Контейнеров в месяц</label>
+          <input id="containersPerMonth" type="number" step="1" value="120"></div>
 
-      <label>
-        <span>Курс EUR/RUB</span>
-        <input id="fxEurRub" type="number" step="0.0001" value="91.56">
-      </label>
+        <div class="hr"></div>
+        <h2>2) Целевая прибыль</h2>
 
-      <label>
-        <span>НДС</span>
-        <input id="vatRate" type="number" step="0.01" value="0.22">
-      </label>
+        <div class="row"><label>Целевая ЧП (₽/год)</label>
+          <input id="targetNetProfitYear" type="number" step="1000000" value="300000000"></div>
+        <div class="row"><label>Налог на прибыль (доля, напр. 0.25)</label>
+          <input id="profitTaxRate" type="number" step="0.001" value="0.25"></div>
 
-      <div class="hint">
-        Формула НДС (упрощённо): (таможенная стоимость + пошлина + акциз) × НДС.<br>
-        Таможенные сборы/прочее можно учитывать в “THC/брокер”, но если хочешь строгую базу НДС — добавь их в таможенную стоимость.
+        <div class="hr"></div>
+        <h2>3) Гос.платежи (редактируются)</h2>
+
+        <div class="row"><label>Литров в бутылке</label>
+          <input id="bottleLiters" type="number" step="0.01" value="0.33"></div>
+        <div class="row"><label>Акциз (₽/литр)</label>
+          <input id="exciseRubPerLiter" type="number" step="0.01" value="33"></div>
+
+        <div class="row"><label>Пошлина (€/литр)</label>
+          <input id="dutyEurPerLiter" type="number" step="0.0001" value="0.018"></div>
+        <div class="row"><label>Курс EUR/RUB</label>
+          <input id="eurRub" type="number" step="0.01" value="100"></div>
+
+        <div class="row"><label>Код ЧЗ (₽/бут, без НДС)</label>
+          <input id="czCodeRub" type="number" step="0.01" value="0.50"></div>
+
+        <div class="hr"></div>
+        <h2>4) Наши расходы и термины (EXW/FOB/CIF)</h2>
+
+        <div class="row"><label>Ocean freight (₽/конт)</label>
+          <input id="oceanRubPerContainer" type="number" step="1000" value="0"></div>
+        <div class="row"><label>Страхование (₽/конт)</label>
+          <input id="insuranceRubPerContainer" type="number" step="1000" value="0"></div>
+        <div class="row"><label>Origin/local (EXW→FOB) (₽/конт)</label>
+          <input id="originRubPerContainer" type="number" step="1000" value="622544"></div>
+
+        <div class="row"><label>Destination port (USD/конт)</label>
+          <input id="destPortUsdPerContainer" type="number" step="1" value="550"></div>
+        <div class="row"><label>Курс USD/RUB</label>
+          <input id="usdRub" type="number" step="0.01" value="100"></div>
+
+        <div class="row"><label>Внутр. логистика до склада X5 (₽/конт)</label>
+          <input id="inlandRubPerContainer" type="number" step="1000" value="52000"></div>
+
+        <div class="row"><label>Таможенный сбор (₽/ДТ/конт)</label>
+          <input id="customsFeeRubPerContainer" type="number" step="1000" value="12000"></div>
+        <div class="row"><label>Брокер (₽/конт)</label>
+          <input id="brokerFeeRubPerContainer" type="number" step="1000" value="15000"></div>
+
+        <div class="row"><label>Маркировка как услуга (₽/бут, без НДС)</label>
+          <input id="markingServiceRubPerBottle" type="number" step="0.01" value="8.00"></div>
+        <div class="row"><label>ЕГАИС/операционка (₽/бут, без НДС)</label>
+          <input id="egaisOpsRubPerBottle" type="number" step="0.01" value="0.00"></div>
+        <div class="row"><label>Прочие операц. (₽/бут, без НДС)</label>
+          <input id="otherOpsRubPerBottle" type="number" step="0.01" value="0.00"></div>
+
+        <div class="hr"></div>
+        <h2>5) Фактическая цена поставщика (для прогноза прибыли)</h2>
+
+        <div class="row"><label>Термин цены поставщика</label>
+          <select id="supplierTerm">
+            <option value="EXW">EXW</option>
+            <option value="FOB">FOB</option>
+            <option value="CIF">CIF</option>
+          </select>
+        </div>
+
+        <div class="row"><label>Цена поставщика (₽/бут, без НДС)</label>
+          <input id="supplierPriceRubPerBottle" type="number" step="0.01" value="0.00"></div>
+
+        <div class="btnRow">
+          <button id="btnReset">Сбросить к дефолтам</button>
+          <button id="btnSave">Сохранить в браузере</button>
+          <button id="btnLoad">Загрузить</button>
+        </div>
+
+        <div class="help">
+          Термины: EXW — цена “на заводе”; FOB — “на борту в порту отправления”; CIF — “включая океан+страховку до порта РФ”.
+          Калькулятор автоматически меняет, какие блоки логистики ты платишь “сверху”, а какие сидят в цене поставщика.
+        </div>
+      </div>
+
+      <!-- OUTPUTS -->
+      <div>
+        <div class="card">
+          <h2>Результаты</h2>
+
+          <div class="kpi">
+            <div class="k">
+              <div class="t">Цена продажи без НДС (₽/бут)</div>
+              <div class="v mono" id="outSellExVat">—</div>
+              <div class="s">Используется для P&L</div>
+            </div>
+            <div class="k">
+              <div class="t">Годовой объём (бут / конт)</div>
+              <div class="v mono" id="outVolumeYear">—</div>
+              <div class="s">12 месяцев</div>
+            </div>
+            <div class="k">
+              <div class="t">Треб. прибыль до налога (₽/бут)</div>
+              <div class="v mono" id="outTargetPBTPerBottle">—</div>
+              <div class="s">Чтобы получить целевую ЧП</div>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="split">
+            <div>
+              <div class="sectionTitle">Потолок цены поставщика (₽/бут, без НДС)</div>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Термин</th>
+                    <th>Макс. цена поставщика</th>
+                    <th>Что оплачиваем сверху</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="mono">EXW</td>
+                    <td class="mono" id="maxEXW">—</td>
+                    <td>origin + ocean + insurance + порт РФ + РФ логистика + таможня + процессы</td>
+                  </tr>
+                  <tr>
+                    <td class="mono">FOB</td>
+                    <td class="mono" id="maxFOB">—</td>
+                    <td>ocean + insurance + порт РФ + РФ логистика + таможня + процессы</td>
+                  </tr>
+                  <tr>
+                    <td class="mono">CIF</td>
+                    <td class="mono" id="maxCIF">—</td>
+                    <td>порт РФ + РФ логистика + таможня + процессы</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="small">
+                Если “макс. цена” отрицательная — при заданных вводных (тарифы/маркировка/цель ЧП) экономика не сходится.
+              </div>
+            </div>
+
+            <div>
+              <div class="sectionTitle">Факт-экономика при введённой цене поставщика</div>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Показатель</th>
+                    <th>На бутылку</th>
+                    <th>На контейнер</th>
+                    <th>На год</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Выручка (без НДС)</td>
+                    <td class="mono" id="revBottle">—</td>
+                    <td class="mono" id="revCont">—</td>
+                    <td class="mono" id="revYear">—</td>
+                  </tr>
+                  <tr>
+                    <td>Себестоимость (все блоки)</td>
+                    <td class="mono" id="costBottle">—</td>
+                    <td class="mono" id="costCont">—</td>
+                    <td class="mono" id="costYear">—</td>
+                  </tr>
+                  <tr>
+                    <td>Прибыль до налога</td>
+                    <td class="mono" id="pbtBottle">—</td>
+                    <td class="mono" id="pbtCont">—</td>
+                    <td class="mono" id="pbtYear">—</td>
+                  </tr>
+                  <tr>
+                    <td>Чистая прибыль</td>
+                    <td class="mono" id="netBottle">—</td>
+                    <td class="mono" id="netCont">—</td>
+                    <td class="mono" id="netYear">—</td>
+                  </tr>
+                  <tr>
+                    <td>Статус к цели 300 млн ЧП/год</td>
+                    <td colspan="3" class="mono" id="goalStatus">—</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="sectionTitle">Визуальный разбор цены (на бутылку, без НДС)</div>
+          <div class="barWrap">
+            <div class="bar" id="waterfallBar" aria-label="stacked bar"></div>
+
+            <div class="legend">
+              <div class="lg"><span class="dot" style="background:#7aa7ff"></span>Цена поставщика</div>
+              <div class="lg"><span class="dot" style="background:#ffcc66"></span>Логистика/таможня</div>
+              <div class="lg"><span class="dot" style="background:#ff8fb1"></span>Маркировка/операции</div>
+              <div class="lg"><span class="dot" style="background:#c6f6d5"></span>Прибыль до налога</div>
+              <div class="lg"><span class="dot" style="background:#ffd1d1"></span>Гос.платежи (акциз+пошлина+ЧЗ)</div>
+            </div>
+
+            <div class="small" id="waterfallText">—</div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="sectionTitle">Описание переменных (что означает)</div>
+          <table class="table">
+            <thead>
+              <tr><th>Переменная</th><th>Смысл</th><th>Где влияет</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="mono">sellPriceVat, vatRate</td><td>Цена X5 “с НДС” и ставка НДС</td><td>Перевод в выручку без НДС</td></tr>
+              <tr><td class="mono">bottlesPerContainer, containersPerMonth</td><td>Упаковка и объём</td><td>Все пересчёты в “на конт/на год”</td></tr>
+              <tr><td class="mono">targetNetProfitYear, profitTaxRate</td><td>Целевая ЧП и налог на прибыль</td><td>Определяет требуемую прибыль до налога на 1 бутылку</td></tr>
+              <tr><td class="mono">exciseRubPerLiter, bottleLiters</td><td>Акциз на литр и литраж бутылки</td><td>Фикс. гос.платеж на 1 бутылку</td></tr>
+              <tr><td class="mono">dutyEurPerLiter, eurRub</td><td>Пошлина в €/л и курс</td><td>Фикс. гос.платеж на 1 бутылку</td></tr>
+              <tr><td class="mono">czCodeRub</td><td>Стоимость кода Честного знака (без НДС)</td><td>Фикс. комплаенс-затрата на 1 бутылку</td></tr>
+              <tr><td class="mono">originRubPerContainer</td><td>Origin/local (EXW→FOB): завод→порт, экспортные локальные</td><td>Оплачивается нами только при EXW</td></tr>
+              <tr><td class="mono">oceanRubPerContainer, insuranceRubPerContainer</td><td>Океан + морская страховка</td><td>Оплачивается нами при EXW/FOB; включено в цену поставщика при CIF</td></tr>
+              <tr><td class="mono">destPortUsdPerContainer, usdRub</td><td>Destination портовые/THC в РФ</td><td>Оплачиваем всегда (EXW/FOB/CIF)</td></tr>
+              <tr><td class="mono">inlandRubPerContainer</td><td>Доставка по РФ до склада X5</td><td>Оплачиваем всегда</td></tr>
+              <tr><td class="mono">customsFeeRubPerContainer, brokerFeeRubPerContainer</td><td>Таможенный сбор + брокер</td><td>Оплачиваем всегда</td></tr>
+              <tr><td class="mono">markingServiceRubPerBottle</td><td>Аутсорс печати/наклейки/ввода</td><td>Один из главных рычагов маржи</td></tr>
+              <tr><td class="mono">egaisOpsRubPerBottle, otherOpsRubPerBottle</td><td>ЕГАИС/ИТ/операции + прочие переменные</td><td>Позволяет моделировать “свои процессы vs аутсорс”</td></tr>
+            </tbody>
+          </table>
+
+        </div>
       </div>
     </div>
-  </div>
-
-  <div class="card" style="margin-top:14px;">
-    <h2>Результаты</h2>
-    <table>
-      <tr><td>Бутылок на паллете</td><td id="out_bottlesPerPallet" class="mono"></td></tr>
-      <tr><td>Бутылок в контейнере</td><td id="out_bottlesPerContainer" class="mono kpi"></td></tr>
-      <tr><td>Всего бутылок</td><td id="out_totalBottles" class="mono kpi"></td></tr>
-
-      <tr><td colspan="2" style="padding-top:12px; border-bottom:none;"><b>Налоги/сборы на 1 бутылку</b></td></tr>
-      <tr><td>Пошлина, ₽/бут</td><td id="out_dutyPerBottle" class="mono"></td></tr>
-      <tr><td>Акциз, ₽/бут</td><td id="out_excisePerBottle" class="mono"></td></tr>
-      <tr><td>НДС, ₽/бут</td><td id="out_vatPerBottle" class="mono"></td></tr>
-      <tr><td>THC+брокер+фрахт (распр.), ₽/бут</td><td id="out_logPerBottle" class="mono"></td></tr>
-      <tr><td class="kpi">Итого “до порта”, ₽/бут</td><td id="out_totalPerBottle" class="mono kpi"></td></tr>
-
-      <tr><td colspan="2" style="padding-top:12px; border-bottom:none;"><b>Итоги</b></td></tr>
-      <tr><td>Итого на контейнер, ₽</td><td id="out_totalPerContainerRub" class="mono kpi"></td></tr>
-      <tr><td>Итого на все контейнеры, ₽</td><td id="out_totalAllRub" class="mono kpi"></td></tr>
-    </table>
-    <div class="hint" id="notes"></div>
   </div>
 
 <script>
-  const $ = (id) => document.getElementById(id);
+  const $ = (id)=>document.getElementById(id);
 
-  const inputs = [
-    "containers","palletsPerContainer","casesPerPallet","bottlesPerCase","bottleL",
-    "customsValuePerBottle","freightPerContainer","thcPerContainer","brokerPerContainer",
-    "exciseRubPerL","dutyEurPerL","fxEurRub","vatRate"
-  ];
+  const defaults = {
+    sellPriceVat: 100,
+    vatRate: 0.22,
+    bottlesPerContainer: 46080,
+    containersPerMonth: 120,
+    targetNetProfitYear: 300000000,
+    profitTaxRate: 0.25,
+    bottleLiters: 0.33,
+    exciseRubPerLiter: 33,
+    dutyEurPerLiter: 0.018,
+    eurRub: 100,
+    czCodeRub: 0.50,
+    oceanRubPerContainer: 0,
+    insuranceRubPerContainer: 0,
+    originRubPerContainer: 622544,
+    destPortUsdPerContainer: 550,
+    usdRub: 100,
+    inlandRubPerContainer: 52000,
+    customsFeeRubPerContainer: 12000,
+    brokerFeeRubPerContainer: 15000,
+    markingServiceRubPerBottle: 8.00,
+    egaisOpsRubPerBottle: 0.00,
+    otherOpsRubPerBottle: 0.00,
+    supplierTerm: "EXW",
+    supplierPriceRubPerBottle: 0.00
+  };
 
-  function n(v){ return Number(v || 0); }
-  function fmt(v, digits=2){
-    if (!isFinite(v)) return "—";
-    return v.toLocaleString("ru-RU", { maximumFractionDigits: digits, minimumFractionDigits: digits });
+  function num(v){ return Number(v || 0); }
+  function fmt(n, digits=2){
+    if (!isFinite(n)) return "—";
+    const sign = n < 0 ? "-" : "";
+    n = Math.abs(n);
+    return sign + n.toLocaleString("ru-RU", {minimumFractionDigits: digits, maximumFractionDigits: digits});
   }
-  function fmt0(v){
-    if (!isFinite(v)) return "—";
-    return v.toLocaleString("ru-RU");
+  function fmt0(n){
+    if (!isFinite(n)) return "—";
+    return n.toLocaleString("ru-RU", {maximumFractionDigits:0});
+  }
+
+  function getInputs(){
+    const ids = Object.keys(defaults);
+    const data = {};
+    for (const id of ids){
+      const el = $(id);
+      if (!el) continue;
+      if (el.tagName === "SELECT") data[id] = el.value;
+      else data[id] = num(el.value);
+    }
+    return data;
+  }
+
+  function payableCostsPerBottle(term, inp){
+    const bpc = inp.bottlesPerContainer;
+
+    const origin = (term === "EXW") ? (inp.originRubPerContainer / bpc) : 0;
+    const ocean  = (term === "EXW" || term === "FOB") ? (inp.oceanRubPerContainer / bpc) : 0;
+    const ins    = (term === "EXW" || term === "FOB") ? (inp.insuranceRubPerContainer / bpc) : 0;
+
+    const destPort = (inp.destPortUsdPerContainer * inp.usdRub) / bpc;
+    const inland   = inp.inlandRubPerContainer / bpc;
+    const customs  = inp.customsFeeRubPerContainer / bpc;
+    const broker   = inp.brokerFeeRubPerContainer / bpc;
+
+    const marking  = inp.markingServiceRubPerBottle;
+    const egais    = inp.egaisOpsRubPerBottle;
+    const otherOps = inp.otherOpsRubPerBottle;
+
+    return {
+      origin, ocean, ins, destPort, inland, customs, broker, marking, egais, otherOps,
+      total: origin + ocean + ins + destPort + inland + customs + broker + marking + egais + otherOps
+    };
+  }
+
+  function govCostsPerBottle(inp){
+    const excise = inp.exciseRubPerLiter * inp.bottleLiters;
+    const duty   = inp.dutyEurPerLiter * inp.bottleLiters * inp.eurRub;
+    const cz     = inp.czCodeRub;
+    return { excise, duty, cz, total: excise + duty + cz };
   }
 
   function calc(){
-    const containers = n($("containers").value);
-    const palletsPerContainer = n($("palletsPerContainer").value);
-    const casesPerPallet = n($("casesPerPallet").value);
-    const bottlesPerCase = n($("bottlesPerCase").value);
-    const bottleL = n($("bottleL").value);
+    const inp = getInputs();
 
-    const customsValuePerBottle = n($("customsValuePerBottle").value);
+    const sellExVat = inp.sellPriceVat / (1 + inp.vatRate);
 
-    const freightPerContainer = n($("freightPerContainer").value);
-    const thcPerContainer = n($("thcPerContainer").value);
-    const brokerPerContainer = n($("brokerPerContainer").value);
+    const bottlesPerMonth = inp.bottlesPerContainer * inp.containersPerMonth;
+    const bottlesPerYear  = bottlesPerMonth * 12;
+    const containersPerYear = inp.containersPerMonth * 12;
 
-    const exciseRubPerL = n($("exciseRubPerL").value);
-    const dutyEurPerL = n($("dutyEurPerL").value);
-    const fxEurRub = n($("fxEurRub").value);
-    const vatRate = n($("vatRate").value);
+    const targetNetPerBottle = inp.targetNetProfitYear / bottlesPerYear;
+    const targetPBTPerBottle = targetNetPerBottle / (1 - inp.profitTaxRate);
 
-    const bottlesPerPallet = casesPerPallet * bottlesPerCase;
-    const bottlesPerContainer = palletsPerContainer * bottlesPerPallet;
-    const totalBottles = containers * bottlesPerContainer;
+    const gov = govCostsPerBottle(inp);
 
-    // Taxes per bottle
-    const dutyPerBottle = bottleL * dutyEurPerL * fxEurRub;
-    const excisePerBottle = bottleL * exciseRubPerL;
+    const payEXW = payableCostsPerBottle("EXW", inp);
+    const payFOB = payableCostsPerBottle("FOB", inp);
+    const payCIF = payableCostsPerBottle("CIF", inp);
 
-    // logistics/services per bottle (allocated)
-    const logPerBottle = bottlesPerContainer > 0
-      ? (freightPerContainer + thcPerContainer + brokerPerContainer) / bottlesPerContainer
-      : 0;
+    const maxSupplier = (term, pay) => sellExVat - targetPBTPerBottle - gov.total - pay.total;
 
-    // VAT base (simplified)
-    const vatBasePerBottle = customsValuePerBottle + dutyPerBottle + excisePerBottle;
-    const vatPerBottle = vatBasePerBottle * vatRate;
+    const maxEXW = maxSupplier("EXW", payEXW);
+    const maxFOB = maxSupplier("FOB", payFOB);
+    const maxCIF = maxSupplier("CIF", payCIF);
 
-    // Total per bottle
-    const totalPerBottle = customsValuePerBottle + dutyPerBottle + excisePerBottle + vatPerBottle + logPerBottle;
+    // factual scenario with supplier price
+    const paySelected = payableCostsPerBottle(inp.supplierTerm, inp);
+    const supplier = inp.supplierPriceRubPerBottle;
 
-    const totalPerContainerRub = totalPerBottle * bottlesPerContainer;
-    const totalAllRub = totalPerContainerRub * containers;
+    const totalCostBottle = supplier + gov.total + paySelected.total;
+    const pbtBottle = sellExVat - totalCostBottle;
+    const netBottle = pbtBottle * (1 - inp.profitTaxRate);
 
-    $("out_bottlesPerPallet").textContent = fmt0(bottlesPerPallet);
-    $("out_bottlesPerContainer").textContent = fmt0(bottlesPerContainer);
-    $("out_totalBottles").textContent = fmt0(totalBottles);
+    const revBottle = sellExVat;
+    const revCont = revBottle * inp.bottlesPerContainer;
+    const revYear = revBottle * bottlesPerYear;
 
-    $("out_dutyPerBottle").textContent = fmt(dutyPerBottle, 2);
-    $("out_excisePerBottle").textContent = fmt(excisePerBottle, 2);
-    $("out_vatPerBottle").textContent = fmt(vatPerBottle, 2);
-    $("out_logPerBottle").textContent = fmt(logPerBottle, 2);
-    $("out_totalPerBottle").textContent = fmt(totalPerBottle, 2);
+    const costCont = totalCostBottle * inp.bottlesPerContainer;
+    const costYear = totalCostBottle * bottlesPerYear;
 
-    $("out_totalPerContainerRub").textContent = fmt0(Math.round(totalPerContainerRub));
-    $("out_totalAllRub").textContent = fmt0(Math.round(totalAllRub));
+    const pbtCont = pbtBottle * inp.bottlesPerContainer;
+    const pbtYear = pbtBottle * bottlesPerYear;
 
-    // Notes / sanity
-    let notes = [];
-    notes.push(`Схема: ${casesPerPallet} коробок/паллета × ${bottlesPerCase} бут/коробка × ${palletsPerContainer} паллет/конт = ${fmt0(bottlesPerContainer)} бут/конт.`);
-    if (freightPerContainer > 0 && customsValuePerBottle > 0){
-      notes.push(`Проверь, не задвоил ли ты фрахт: сейчас он учтён как отдельная строка (₽/конт) и НЕ включён в “таможенную стоимость ₽/бут”.`);
+    const netCont = netBottle * inp.bottlesPerContainer;
+    const netYear = netBottle * bottlesPerYear;
+
+    // render KPIs
+    $("outSellExVat").textContent = fmt(sellExVat, 2) + " ₽";
+    $("outVolumeYear").textContent = fmt0(bottlesPerYear) + " бут / " + fmt0(containersPerYear) + " конт";
+    $("outTargetPBTPerBottle").textContent = fmt(targetPBTPerBottle, 2) + " ₽";
+
+    $("maxEXW").textContent = fmt(maxEXW, 2) + " ₽";
+    $("maxFOB").textContent = fmt(maxFOB, 2) + " ₽";
+    $("maxCIF").textContent = fmt(maxCIF, 2) + " ₽";
+
+    $("revBottle").textContent = fmt(revBottle, 2) + " ₽";
+    $("revCont").textContent   = fmt(revCont, 0) + " ₽";
+    $("revYear").textContent   = fmt(revYear, 0) + " ₽";
+
+    $("costBottle").textContent = fmt(totalCostBottle, 2) + " ₽";
+    $("costCont").textContent   = fmt(costCont, 0) + " ₽";
+    $("costYear").textContent   = fmt(costYear, 0) + " ₽";
+
+    $("pbtBottle").textContent = fmt(pbtBottle, 2) + " ₽";
+    $("pbtCont").textContent   = fmt(pbtCont, 0) + " ₽";
+    $("pbtYear").textContent   = fmt(pbtYear, 0) + " ₽";
+
+    $("netBottle").textContent = fmt(netBottle, 2) + " ₽";
+    $("netCont").textContent   = fmt(netCont, 0) + " ₽";
+    $("netYear").textContent   = fmt(netYear, 0) + " ₽";
+
+    // goal status
+    const diff = netYear - inp.targetNetProfitYear;
+    let statusClass = diff >= 0 ? "ok" : "bad";
+    let statusText = (diff >= 0)
+      ? `ДОСТИГАЕМ цели: ${fmt(netYear,0)} ₽/год (запас ${fmt(diff,0)} ₽)`
+      : `НЕ ДОСТИГАЕМ: ${fmt(netYear,0)} ₽/год (дефицит ${fmt(-diff,0)} ₽)`;
+    $("goalStatus").innerHTML = `<span class="${statusClass}">${statusText}</span>`;
+
+    // waterfall bar (relative to sellExVat)
+    const denom = Math.max(0.01, sellExVat);
+
+    // split payable into "логистика/таможня" vs "маркировка/операции"
+    const logistics =
+      paySelected.origin + paySelected.ocean + paySelected.ins + paySelected.destPort +
+      paySelected.inland + paySelected.customs + paySelected.broker;
+
+    const ops = paySelected.marking + paySelected.egais + paySelected.otherOps;
+
+    const supplierShare = Math.max(0, supplier);
+    const govShare = Math.max(0, gov.total);
+    const logShare = Math.max(0, logistics);
+    const opsShare = Math.max(0, ops);
+    const pbtShare = Math.max(0, pbtBottle);
+
+    // normalize segments to sellExVat (if costs exceed revenue, bar still shows proportions capped)
+    const totalShown = supplierShare + govShare + logShare + opsShare + pbtShare;
+    const scale = totalShown > 0 ? (100 / totalShown) : 0;
+
+    const segs = [
+      {w: supplierShare*scale, c:"#7aa7ff", name:"Поставщик", v:supplierShare},
+      {w: govShare*scale,      c:"#ffd1d1", name:"Гос.платежи", v:govShare},
+      {w: logShare*scale,      c:"#ffcc66", name:"Логистика/таможня", v:logShare},
+      {w: opsShare*scale,      c:"#ff8fb1", name:"Маркировка/операции", v:opsShare},
+      {w: pbtShare*scale,      c:"#c6f6d5", name:"Прибыль до налога", v:pbtShare},
+    ];
+
+    const bar = $("waterfallBar");
+    bar.innerHTML = "";
+    for (const s of segs){
+      const d = document.createElement("span");
+      d.className = "seg";
+      d.style.width = Math.max(0, s.w).toFixed(3) + "%";
+      d.style.background = s.c;
+      d.title = `${s.name}: ${fmt(s.v,2)} ₽/бут`;
+      bar.appendChild(d);
     }
-    $("notes").textContent = notes.join(" ");
+
+    $("waterfallText").textContent =
+      `Термин: ${inp.supplierTerm}. ` +
+      `Поставщик: ${fmt(supplier,2)} ₽ | Гос: ${fmt(gov.total,2)} ₽ | Лог+там: ${fmt(logistics,2)} ₽ | Опер: ${fmt(ops,2)} ₽ | PBT: ${fmt(pbtBottle,2)} ₽ ` +
+      `(все значения на 1 бутылку, без НДС).`;
   }
 
-  function wire(){
-    inputs.forEach(id => {
-      $(id).addEventListener("input", calc);
-      $(id).addEventListener("change", calc);
-    });
+  function bind(){
+    const all = document.querySelectorAll("input, select");
+    all.forEach(el => el.addEventListener("input", calc));
+    all.forEach(el => el.addEventListener("change", calc));
 
-    $("resetBtn").addEventListener("click", () => {
-      $("containers").value = 30;
-      $("palletsPerContainer").value = 24;
-      $("casesPerPallet").value = 80;
-      $("bottlesPerCase").value = 24;
-      $("bottleL").value = 0.33;
-
-      $("customsValuePerBottle").value = 50;
-      $("freightPerContainer").value = 0;
-      $("thcPerContainer").value = 0;
-      $("brokerPerContainer").value = 0;
-
-      $("exciseRubPerL").value = 33;
-      $("dutyEurPerL").value = 0.018;
-      $("fxEurRub").value = 91.56;
-      $("vatRate").value = 0.22;
-
+    $("btnReset").addEventListener("click", ()=>{
+      for (const [k,v] of Object.entries(defaults)){
+        const el = $(k);
+        if (!el) continue;
+        if (el.tagName === "SELECT") el.value = v;
+        else el.value = v;
+      }
       calc();
     });
 
-    // пример — просто чтобы было от чего плясать (меняй под себя)
-    $("exampleBtn").addEventListener("click", () => {
-      $("freightPerContainer").value = 350000; // условно
-      $("thcPerContainer").value = 90000;      // условно
-      $("brokerPerContainer").value = 35000;   // условно
-      calc();
+    $("btnSave").addEventListener("click", ()=>{
+      const data = getInputs();
+      localStorage.setItem("corona_dash_inputs_v1", JSON.stringify(data));
+      alert("Сохранено в браузере (localStorage).");
     });
 
+    $("btnLoad").addEventListener("click", ()=>{
+      const raw = localStorage.getItem("corona_dash_inputs_v1");
+      if (!raw) { alert("Нет сохранённых данных."); return; }
+      const data = JSON.parse(raw);
+      for (const [k,v] of Object.entries(data)){
+        const el = $(k);
+        if (!el) continue;
+        if (el.tagName === "SELECT") el.value = v;
+        else el.value = v;
+      }
+      calc();
+    });
+  }
+
+  // init
+  (function init(){
+    bind();
     calc();
-  }
-
-  wire();
+  })();
 </script>
 </body>
 </html>

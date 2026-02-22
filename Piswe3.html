@@ -16,6 +16,13 @@
       --bad:#ff6b6b;
       --warn:#ffcc66;
       --chip:#1a2550;
+
+      --c-supplier:#7aa7ff;
+      --c-gov:#ffd1d1;
+      --c-log:#ffcc66;
+      --c-ops:#ff8fb1;
+      --c-profit:#c6f6d5;
+      --c-loss:#ff6b6b;
     }
     *{box-sizing:border-box}
     body{
@@ -24,15 +31,16 @@
       background: radial-gradient(1200px 700px at 15% 10%, #14204a 0%, var(--bg) 55%);
       color:var(--text);
     }
-    .wrap{max-width:1280px;margin:0 auto;padding:20px}
+    .wrap{max-width:1320px;margin:0 auto;padding:20px}
     h1{margin:0 0 8px;font-size:20px;font-weight:750}
     .sub{color:var(--muted);font-size:13px;line-height:1.35;margin-bottom:14px}
+
     .grid{
       display:grid;
-      grid-template-columns: 420px 1fr;
+      grid-template-columns: 430px 1fr;
       gap:14px;
     }
-    @media (max-width: 1020px){
+    @media (max-width: 1040px){
       .grid{grid-template-columns:1fr}
     }
     .card{
@@ -48,10 +56,20 @@
       letter-spacing:.2px;
       color:#f2f4ff;
     }
-    .row{display:flex;gap:10px;align-items:center;margin:8px 0}
+
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin:8px 0;
+      padding:6px 8px;
+      border-radius:12px;
+      border:1px solid transparent;
+      transition: border-color .12s ease, background .12s ease;
+    }
     .row label{flex:1;color:var(--muted);font-size:12px}
     .row input, .row select{
-      width:170px;
+      width:178px;
       background:#0b1430;
       border:1px solid var(--line);
       color:var(--text);
@@ -59,32 +77,40 @@
       border-radius:10px;
       outline:none;
       font-size:13px;
+      transition: border-color .12s ease, box-shadow .12s ease;
     }
     .row input:focus, .row select:focus{border-color:rgba(255,255,255,.25)}
+    .row.active{
+      border-color: rgba(122,167,255,.65);
+      background: rgba(122,167,255,.06);
+    }
+    .row.active input, .row.active select{
+      border-color: rgba(122,167,255,.75);
+      box-shadow: 0 0 0 3px rgba(122,167,255,.15);
+    }
+
     .help{color:var(--muted);font-size:11px;line-height:1.35;margin-top:8px}
-    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-    .chip{
-      background:rgba(255,255,255,.06);
+    .hr{height:1px;background:var(--line);margin:12px 0}
+
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    button{
+      background:#0b1430;
+      color:var(--text);
       border:1px solid var(--line);
-      padding:6px 8px;
-      border-radius:999px;
+      padding:8px 10px;
+      border-radius:12px;
+      cursor:pointer;
       font-size:12px;
-      color:var(--muted);
     }
-    .split{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:14px;
-    }
-    @media (max-width: 1020px){
-      .split{grid-template-columns:1fr}
-    }
+    button:hover{border-color:rgba(255,255,255,.25)}
+
     .kpi{
       display:grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap:10px;
+      margin-bottom:12px;
     }
-    @media (max-width: 1020px){
+    @media (max-width: 1040px){
       .kpi{grid-template-columns:1fr}
     }
     .k{
@@ -98,8 +124,9 @@
     .k .s{color:var(--muted);font-size:12px;margin-top:4px}
     .ok{color:var(--good)}
     .bad{color:var(--bad)}
-    .warn{color:var(--warn)}
+
     .sectionTitle{margin:0 0 8px;font-size:13px;color:#f2f4ff;font-weight:750}
+
     .table{
       width:100%;
       border-collapse:separate;
@@ -118,51 +145,156 @@
     }
     .table th{color:var(--muted);font-weight:700;background:rgba(255,255,255,.03)}
     .table tr:last-child td{border-bottom:none}
+
     .mono{font-variant-numeric: tabular-nums}
-    .barWrap{
-      margin-top:10px;
+
+    /* Visualization */
+    .vizCard{
+      padding:16px;
+    }
+    .vizHeader{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:10px;
+    }
+    .vizHeader .left h2{margin:0 0 6px}
+    .vizHeader .left .note{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.35;
+      margin:0;
+    }
+    .selBox{
+      min-width: 340px;
       border:1px solid var(--line);
       border-radius:14px;
+      background:rgba(255,255,255,.03);
       padding:10px;
+    }
+    @media (max-width: 1040px){
+      .selBox{min-width:auto}
+      .vizHeader{flex-direction:column}
+    }
+    .selBox .title{color:var(--muted);font-size:12px;margin-bottom:6px}
+    .selBox .name{font-weight:800;margin-bottom:6px}
+    .selBox .vals{color:var(--muted);font-size:12px;line-height:1.35}
+
+    .barWrap{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
       background:rgba(255,255,255,.03);
     }
+    .barTitle{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:8px;
+      align-items:center;
+    }
+    .barTitle .l{font-weight:750;font-size:12px;color:#f2f4ff}
+    .barTitle .r{font-size:12px;color:var(--muted)}
     .bar{
-      height:16px;
+      height:22px;
       width:100%;
       background:rgba(255,255,255,.06);
       border-radius:999px;
       overflow:hidden;
       border:1px solid rgba(255,255,255,.08);
+      position:relative;
     }
-    .seg{height:100%;display:inline-block}
+    .seg{
+      height:100%;
+      display:inline-block;
+      cursor:pointer;
+      position:relative;
+      outline:none;
+    }
+    .seg:focus{box-shadow: 0 0 0 3px rgba(122,167,255,.20); border-radius:999px}
     .legend{
-      display:flex;flex-wrap:wrap;gap:10px;margin-top:10px
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:10px;
     }
     .lg{
-      display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)
-    }
-    .dot{width:10px;height:10px;border-radius:3px;background:#fff;opacity:.85}
-    .small{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.35}
-    .hr{height:1px;background:var(--line);margin:12px 0}
-    .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    button{
-      background:#0b1430;
-      color:var(--text);
-      border:1px solid var(--line);
-      padding:8px 10px;
-      border-radius:12px;
-      cursor:pointer;
+      display:flex;
+      gap:8px;
+      align-items:center;
       font-size:12px;
+      color:var(--muted);
     }
-    button:hover{border-color:rgba(255,255,255,.25)}
+    .dot{width:10px;height:10px;border-radius:3px;background:#fff;opacity:.9}
+
+    .detailGrid{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:10px;
+    }
+    @media (max-width: 1040px){
+      .detailGrid{grid-template-columns:1fr 1fr}
+    }
+    .tile{
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:rgba(255,255,255,.03);
+      padding:10px;
+      cursor:pointer;
+      transition: border-color .12s ease, background .12s ease;
+      min-height:64px;
+    }
+    .tile:hover{border-color: rgba(255,255,255,.22)}
+    .tile.active{
+      border-color: rgba(122,167,255,.75);
+      background: rgba(122,167,255,.06);
+    }
+    .tile .t{color:var(--muted);font-size:11px;margin-bottom:6px}
+    .tile .v{font-size:14px;font-weight:800}
+    .tile .c{
+      margin-top:6px;
+      font-size:11px;
+      color:var(--muted);
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .pill{
+      width:10px;height:10px;border-radius:3px;background:#fff;opacity:.9;
+    }
+
+    .small{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.35}
+
+    /* Tooltip */
+    #tooltip{
+      position:fixed;
+      z-index:9999;
+      pointer-events:none;
+      display:none;
+      max-width: 340px;
+      background: rgba(10,16,34,.95);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 14px 28px rgba(0,0,0,.35);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    #tooltip .h{font-weight:800;margin-bottom:6px}
+    #tooltip .m{color:var(--muted)}
   </style>
 </head>
 <body>
+  <div id="tooltip"></div>
+
   <div class="wrap">
     <h1>Corona Import — калькулятор/дашборд</h1>
     <div class="sub">
-      Логика: переводим цену продажи в "без НДС", вычитаем целевую прибыль до налога, фиксированные гос.платежи и наши расходы.
-      На выходе: факт-прибыль + потолок цены поставщика (EXW/FOB/CIF).
+      Логика: считаем P&L «без НДС». Выручка = цена X5 без НДС. Далее вычитаем гос.платежи, наши расходы и цену поставщика.
+      Визуализация: кликай сегменты/плитки — подсветится соответствующий ввод слева.
     </div>
 
     <div class="grid">
@@ -170,74 +302,75 @@
       <div class="card">
         <h2>1) Вводные</h2>
 
-        <div class="row"><label>Цена продажи X5 (₽/бут, с НДС)</label>
+        <div class="row" data-row="sellPriceVat"><label>Цена продажи X5 (₽/бут, с НДС)</label>
           <input id="sellPriceVat" type="number" step="0.01" value="100"></div>
-        <div class="row"><label>НДС (доля, напр. 0.22)</label>
+        <div class="row" data-row="vatRate"><label>НДС (доля, напр. 0.22)</label>
           <input id="vatRate" type="number" step="0.001" value="0.22"></div>
 
-        <div class="row"><label>Бутылок в контейнере 40ft</label>
+        <div class="row" data-row="bottlesPerContainer"><label>Бутылок в контейнере 40ft</label>
           <input id="bottlesPerContainer" type="number" step="1" value="46080"></div>
-        <div class="row"><label>Контейнеров в месяц</label>
+        <div class="row" data-row="containersPerMonth"><label>Контейнеров в месяц</label>
           <input id="containersPerMonth" type="number" step="1" value="120"></div>
 
         <div class="hr"></div>
         <h2>2) Целевая прибыль</h2>
 
-        <div class="row"><label>Целевая ЧП (₽/год)</label>
+        <div class="row" data-row="targetNetProfitYear"><label>Целевая ЧП (₽/год)</label>
           <input id="targetNetProfitYear" type="number" step="1000000" value="300000000"></div>
-        <div class="row"><label>Налог на прибыль (доля, напр. 0.25)</label>
+        <div class="row" data-row="profitTaxRate"><label>Налог на прибыль (доля, напр. 0.25)</label>
           <input id="profitTaxRate" type="number" step="0.001" value="0.25"></div>
 
         <div class="hr"></div>
-        <h2>3) Гос.платежи (редактируются)</h2>
+        <h2>3) Гос.платежи</h2>
 
-        <div class="row"><label>Литров в бутылке</label>
+        <div class="row" data-row="bottleLiters"><label>Литров в бутылке</label>
           <input id="bottleLiters" type="number" step="0.01" value="0.33"></div>
-        <div class="row"><label>Акциз (₽/литр)</label>
+        <div class="row" data-row="exciseRubPerLiter"><label>Акциз (₽/литр)</label>
           <input id="exciseRubPerLiter" type="number" step="0.01" value="33"></div>
 
-        <div class="row"><label>Пошлина (€/литр)</label>
+        <div class="row" data-row="dutyEurPerLiter"><label>Пошлина (€/литр)</label>
           <input id="dutyEurPerLiter" type="number" step="0.0001" value="0.018"></div>
-        <div class="row"><label>Курс EUR/RUB</label>
+        <div class="row" data-row="eurRub"><label>Курс EUR/RUB</label>
           <input id="eurRub" type="number" step="0.01" value="100"></div>
 
-        <div class="row"><label>Код ЧЗ (₽/бут, без НДС)</label>
+        <div class="row" data-row="czCodeRub"><label>Код ЧЗ (₽/бут, без НДС)</label>
           <input id="czCodeRub" type="number" step="0.01" value="0.50"></div>
 
         <div class="hr"></div>
         <h2>4) Наши расходы и термины (EXW/FOB/CIF)</h2>
 
-        <div class="row"><label>Ocean freight (₽/конт)</label>
-          <input id="oceanRubPerContainer" type="number" step="1000" value="0"></div>
-        <div class="row"><label>Страхование (₽/конт)</label>
-          <input id="insuranceRubPerContainer" type="number" step="1000" value="0"></div>
-        <div class="row"><label>Origin/local (EXW→FOB) (₽/конт)</label>
+        <div class="row" data-row="originRubPerContainer"><label>Origin/local (EXW→FOB) (₽/конт)</label>
           <input id="originRubPerContainer" type="number" step="1000" value="622544"></div>
 
-        <div class="row"><label>Destination port (USD/конт)</label>
+        <div class="row" data-row="oceanRubPerContainer"><label>Ocean freight (₽/конт)</label>
+          <input id="oceanRubPerContainer" type="number" step="1000" value="0"></div>
+        <div class="row" data-row="insuranceRubPerContainer"><label>Страхование (₽/конт)</label>
+          <input id="insuranceRubPerContainer" type="number" step="1000" value="0"></div>
+
+        <div class="row" data-row="destPortUsdPerContainer"><label>Destination port (USD/конт)</label>
           <input id="destPortUsdPerContainer" type="number" step="1" value="550"></div>
-        <div class="row"><label>Курс USD/RUB</label>
+        <div class="row" data-row="usdRub"><label>Курс USD/RUB</label>
           <input id="usdRub" type="number" step="0.01" value="100"></div>
 
-        <div class="row"><label>Внутр. логистика до склада X5 (₽/конт)</label>
+        <div class="row" data-row="inlandRubPerContainer"><label>Внутр. логистика до склада X5 (₽/конт)</label>
           <input id="inlandRubPerContainer" type="number" step="1000" value="52000"></div>
 
-        <div class="row"><label>Таможенный сбор (₽/ДТ/конт)</label>
+        <div class="row" data-row="customsFeeRubPerContainer"><label>Таможенный сбор (₽/ДТ/конт)</label>
           <input id="customsFeeRubPerContainer" type="number" step="1000" value="12000"></div>
-        <div class="row"><label>Брокер (₽/конт)</label>
+        <div class="row" data-row="brokerFeeRubPerContainer"><label>Брокер (₽/конт)</label>
           <input id="brokerFeeRubPerContainer" type="number" step="1000" value="15000"></div>
 
-        <div class="row"><label>Маркировка как услуга (₽/бут, без НДС)</label>
+        <div class="row" data-row="markingServiceRubPerBottle"><label>Маркировка как услуга (₽/бут, без НДС)</label>
           <input id="markingServiceRubPerBottle" type="number" step="0.01" value="8.00"></div>
-        <div class="row"><label>ЕГАИС/операционка (₽/бут, без НДС)</label>
+        <div class="row" data-row="egaisOpsRubPerBottle"><label>ЕГАИС/операционка (₽/бут, без НДС)</label>
           <input id="egaisOpsRubPerBottle" type="number" step="0.01" value="0.00"></div>
-        <div class="row"><label>Прочие операц. (₽/бут, без НДС)</label>
+        <div class="row" data-row="otherOpsRubPerBottle"><label>Прочие операц. (₽/бут, без НДС)</label>
           <input id="otherOpsRubPerBottle" type="number" step="0.01" value="0.00"></div>
 
         <div class="hr"></div>
-        <h2>5) Фактическая цена поставщика (для прогноза прибыли)</h2>
+        <h2>5) Факт: цена поставщика</h2>
 
-        <div class="row"><label>Термин цены поставщика</label>
+        <div class="row" data-row="supplierTerm"><label>Термин цены поставщика</label>
           <select id="supplierTerm">
             <option value="EXW">EXW</option>
             <option value="FOB">FOB</option>
@@ -245,25 +378,68 @@
           </select>
         </div>
 
-        <div class="row"><label>Цена поставщика (₽/бут, без НДС)</label>
+        <div class="row" data-row="supplierPriceRubPerBottle"><label>Цена поставщика (₽/бут, без НДС)</label>
           <input id="supplierPriceRubPerBottle" type="number" step="0.01" value="0.00"></div>
 
         <div class="btnRow">
-          <button id="btnReset">Сбросить к дефолтам</button>
-          <button id="btnSave">Сохранить в браузере</button>
+          <button id="btnReset">Сбросить</button>
+          <button id="btnSave">Сохранить</button>
           <button id="btnLoad">Загрузить</button>
+          <button id="btnClearSel">Снять выделение</button>
         </div>
 
         <div class="help">
-          Термины: EXW — цена “на заводе”; FOB — “на борту в порту отправления”; CIF — “включая океан+страховку до порта РФ”.
-          Калькулятор автоматически меняет, какие блоки логистики ты платишь “сверху”, а какие сидят в цене поставщика.
+          Подсказка: клик по сегменту/плитке — подсветка полей ввода. Hover — абсолюты на бутылку/конт/мес/год.
         </div>
       </div>
 
       <!-- OUTPUTS -->
       <div>
+        <!-- MAIN VIS -->
+        <div class="card vizCard">
+          <div class="vizHeader">
+            <div class="left">
+              <h2>Визуализация цены (главное)</h2>
+              <p class="note">
+                Это расклад цены «без НДС» по выбранному термину цены поставщика (<span class="mono" id="outTerm">—</span>).
+                Если прибыль отрицательная — сегмент «Убыток» покажет дефицит.
+              </p>
+            </div>
+            <div class="selBox" id="selBox">
+              <div class="title">Выбранный элемент</div>
+              <div class="name mono" id="selName">—</div>
+              <div class="vals mono" id="selVals">Наведись или кликни по сегменту/плитке</div>
+            </div>
+          </div>
+
+          <div class="barWrap">
+            <div class="barTitle">
+              <div class="l">Цена продажи без НДС = 100%</div>
+              <div class="r mono" id="outSellExVatInline">—</div>
+            </div>
+            <div class="bar" id="mainBar" aria-label="stacked bar"></div>
+
+            <div class="legend">
+              <div class="lg"><span class="dot" style="background:var(--c-supplier)"></span>Поставщик</div>
+              <div class="lg"><span class="dot" style="background:var(--c-gov)"></span>Гос.платежи</div>
+              <div class="lg"><span class="dot" style="background:var(--c-log)"></span>Логистика/таможня</div>
+              <div class="lg"><span class="dot" style="background:var(--c-ops)"></span>Маркировка/операции</div>
+              <div class="lg"><span class="dot" style="background:var(--c-profit)"></span>Прибыль до налога</div>
+              <div class="lg"><span class="dot" style="background:var(--c-loss)"></span>Убыток (дефицит)</div>
+            </div>
+
+            <div class="small" id="mainBarText">—</div>
+
+            <div class="hr"></div>
+            <div class="sectionTitle">Детализация (кликабельные элементы)</div>
+            <div class="detailGrid" id="detailGrid"></div>
+            <div class="small">Смысл: плитки — точка управления. Жмёшь на “Маркировка”, “THC”, “Брокер” и т.д. и правишь ввод слева.</div>
+          </div>
+        </div>
+
+        <!-- KPIs -->
         <div class="card">
-          <h2>Результаты</h2>
+          <h2>Ключевые метрики</h2>
 
           <div class="kpi">
             <div class="k">
@@ -281,110 +457,86 @@
               <div class="v mono" id="outTargetPBTPerBottle">—</div>
               <div class="s">Чтобы получить целевую ЧП</div>
             </div>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="split">
-            <div>
-              <div class="sectionTitle">Потолок цены поставщика (₽/бут, без НДС)</div>
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Термин</th>
-                    <th>Макс. цена поставщика</th>
-                    <th>Что оплачиваем сверху</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="mono">EXW</td>
-                    <td class="mono" id="maxEXW">—</td>
-                    <td>origin + ocean + insurance + порт РФ + РФ логистика + таможня + процессы</td>
-                  </tr>
-                  <tr>
-                    <td class="mono">FOB</td>
-                    <td class="mono" id="maxFOB">—</td>
-                    <td>ocean + insurance + порт РФ + РФ логистика + таможня + процессы</td>
-                  </tr>
-                  <tr>
-                    <td class="mono">CIF</td>
-                    <td class="mono" id="maxCIF">—</td>
-                    <td>порт РФ + РФ логистика + таможня + процессы</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <div class="small">
-                Если “макс. цена” отрицательная — при заданных вводных (тарифы/маркировка/цель ЧП) экономика не сходится.
-              </div>
-            </div>
-
-            <div>
-              <div class="sectionTitle">Факт-экономика при введённой цене поставщика</div>
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Показатель</th>
-                    <th>На бутылку</th>
-                    <th>На контейнер</th>
-                    <th>На год</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Выручка (без НДС)</td>
-                    <td class="mono" id="revBottle">—</td>
-                    <td class="mono" id="revCont">—</td>
-                    <td class="mono" id="revYear">—</td>
-                  </tr>
-                  <tr>
-                    <td>Себестоимость (все блоки)</td>
-                    <td class="mono" id="costBottle">—</td>
-                    <td class="mono" id="costCont">—</td>
-                    <td class="mono" id="costYear">—</td>
-                  </tr>
-                  <tr>
-                    <td>Прибыль до налога</td>
-                    <td class="mono" id="pbtBottle">—</td>
-                    <td class="mono" id="pbtCont">—</td>
-                    <td class="mono" id="pbtYear">—</td>
-                  </tr>
-                  <tr>
-                    <td>Чистая прибыль</td>
-                    <td class="mono" id="netBottle">—</td>
-                    <td class="mono" id="netCont">—</td>
-                    <td class="mono" id="netYear">—</td>
-                  </tr>
-                  <tr>
-                    <td>Статус к цели 300 млн ЧП/год</td>
-                    <td colspan="3" class="mono" id="goalStatus">—</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="k">
+              <div class="t">Статус к цели (ЧП/год)</div>
+              <div class="v mono" id="goalKpi">—</div>
+              <div class="s mono" id="goalKpiSub">—</div>
             </div>
           </div>
 
           <div class="hr"></div>
 
-          <div class="sectionTitle">Визуальный разбор цены (на бутылку, без НДС)</div>
-          <div class="barWrap">
-            <div class="bar" id="waterfallBar" aria-label="stacked bar"></div>
-
-            <div class="legend">
-              <div class="lg"><span class="dot" style="background:#7aa7ff"></span>Цена поставщика</div>
-              <div class="lg"><span class="dot" style="background:#ffcc66"></span>Логистика/таможня</div>
-              <div class="lg"><span class="dot" style="background:#ff8fb1"></span>Маркировка/операции</div>
-              <div class="lg"><span class="dot" style="background:#c6f6d5"></span>Прибыль до налога</div>
-              <div class="lg"><span class="dot" style="background:#ffd1d1"></span>Гос.платежи (акциз+пошлина+ЧЗ)</div>
-            </div>
-
-            <div class="small" id="waterfallText">—</div>
-          </div>
+          <div class="sectionTitle">Потолок цены поставщика (₽/бут, без НДС) под цель ЧП</div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Термин</th>
+                <th>Макс. цена поставщика</th>
+                <th>Что оплачиваем сверху</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="mono">EXW</td>
+                <td class="mono" id="maxEXW">—</td>
+                <td>origin + ocean + insurance + порт РФ + РФ логистика + таможня + операции</td>
+              </tr>
+              <tr>
+                <td class="mono">FOB</td>
+                <td class="mono" id="maxFOB">—</td>
+                <td>ocean + insurance + порт РФ + РФ логистика + таможня + операции</td>
+              </tr>
+              <tr>
+                <td class="mono">CIF</td>
+                <td class="mono" id="maxCIF">—</td>
+                <td>порт РФ + РФ логистика + таможня + операции</td>
+              </tr>
+            </tbody>
+          </table>
 
           <div class="hr"></div>
 
-          <div class="sectionTitle">Описание переменных (что означает)</div>
+          <div class="sectionTitle">Факт-экономика при введённой цене поставщика</div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Показатель</th>
+                <th>На бутылку</th>
+                <th>На контейнер</th>
+                <th>На год</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Выручка (без НДС)</td>
+                <td class="mono" id="revBottle">—</td>
+                <td class="mono" id="revCont">—</td>
+                <td class="mono" id="revYear">—</td>
+              </tr>
+              <tr>
+                <td>Себестоимость (все блоки)</td>
+                <td class="mono" id="costBottle">—</td>
+                <td class="mono" id="costCont">—</td>
+                <td class="mono" id="costYear">—</td>
+              </tr>
+              <tr>
+                <td>Прибыль до налога</td>
+                <td class="mono" id="pbtBottle">—</td>
+                <td class="mono" id="pbtCont">—</td>
+                <td class="mono" id="pbtYear">—</td>
+              </tr>
+              <tr>
+                <td>Чистая прибыль</td>
+                <td class="mono" id="netBottle">—</td>
+                <td class="mono" id="netCont">—</td>
+                <td class="mono" id="netYear">—</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="hr"></div>
+
+          <div class="sectionTitle">Описание переменных (легенда)</div>
           <table class="table">
             <thead>
               <tr><th>Переменная</th><th>Смысл</th><th>Где влияет</th></tr>
@@ -392,17 +544,18 @@
             <tbody>
               <tr><td class="mono">sellPriceVat, vatRate</td><td>Цена X5 “с НДС” и ставка НДС</td><td>Перевод в выручку без НДС</td></tr>
               <tr><td class="mono">bottlesPerContainer, containersPerMonth</td><td>Упаковка и объём</td><td>Все пересчёты в “на конт/на год”</td></tr>
-              <tr><td class="mono">targetNetProfitYear, profitTaxRate</td><td>Целевая ЧП и налог на прибыль</td><td>Определяет требуемую прибыль до налога на 1 бутылку</td></tr>
-              <tr><td class="mono">exciseRubPerLiter, bottleLiters</td><td>Акциз на литр и литраж бутылки</td><td>Фикс. гос.платеж на 1 бутылку</td></tr>
-              <tr><td class="mono">dutyEurPerLiter, eurRub</td><td>Пошлина в €/л и курс</td><td>Фикс. гос.платеж на 1 бутылку</td></tr>
-              <tr><td class="mono">czCodeRub</td><td>Стоимость кода Честного знака (без НДС)</td><td>Фикс. комплаенс-затрата на 1 бутылку</td></tr>
-              <tr><td class="mono">originRubPerContainer</td><td>Origin/local (EXW→FOB): завод→порт, экспортные локальные</td><td>Оплачивается нами только при EXW</td></tr>
-              <tr><td class="mono">oceanRubPerContainer, insuranceRubPerContainer</td><td>Океан + морская страховка</td><td>Оплачивается нами при EXW/FOB; включено в цену поставщика при CIF</td></tr>
-              <tr><td class="mono">destPortUsdPerContainer, usdRub</td><td>Destination портовые/THC в РФ</td><td>Оплачиваем всегда (EXW/FOB/CIF)</td></tr>
+              <tr><td class="mono">targetNetProfitYear, profitTaxRate</td><td>Целевая ЧП и налог на прибыль</td><td>Требуемая прибыль до налога на 1 бутылку</td></tr>
+              <tr><td class="mono">exciseRubPerLiter, bottleLiters</td><td>Акциз на литр и литраж</td><td>Гос.платеж на 1 бутылку</td></tr>
+              <tr><td class="mono">dutyEurPerLiter, eurRub</td><td>Пошлина в €/л и курс</td><td>Гос.платеж на 1 бутылку</td></tr>
+              <tr><td class="mono">czCodeRub</td><td>Стоимость кода ЧЗ (без НДС)</td><td>Гос/комплаенс на 1 бутылку</td></tr>
+              <tr><td class="mono">originRubPerContainer</td><td>Origin/local (EXW→FOB)</td><td>Оплачиваем только при EXW</td></tr>
+              <tr><td class="mono">oceanRubPerContainer, insuranceRubPerContainer</td><td>Океан + страховка</td><td>Оплачиваем при EXW/FOB; включено в цену при CIF</td></tr>
+              <tr><td class="mono">destPortUsdPerContainer, usdRub</td><td>Портовые/THC (RF)</td><td>Оплачиваем всегда</td></tr>
               <tr><td class="mono">inlandRubPerContainer</td><td>Доставка по РФ до склада X5</td><td>Оплачиваем всегда</td></tr>
               <tr><td class="mono">customsFeeRubPerContainer, brokerFeeRubPerContainer</td><td>Таможенный сбор + брокер</td><td>Оплачиваем всегда</td></tr>
-              <tr><td class="mono">markingServiceRubPerBottle</td><td>Аутсорс печати/наклейки/ввода</td><td>Один из главных рычагов маржи</td></tr>
-              <tr><td class="mono">egaisOpsRubPerBottle, otherOpsRubPerBottle</td><td>ЕГАИС/ИТ/операции + прочие переменные</td><td>Позволяет моделировать “свои процессы vs аутсорс”</td></tr>
+              <tr><td class="mono">markingServiceRubPerBottle</td><td>Маркировка как услуга</td><td>Главный рычаг маржи</td></tr>
+              <tr><td class="mono">egaisOpsRubPerBottle, otherOpsRubPerBottle</td><td>ЕГАИС/ИТ/операции + прочее</td><td>Моделирование “аутсорс vs свои процессы”</td></tr>
+              <tr><td class="mono">supplierTerm, supplierPriceRubPerBottle</td><td>Термин и цена поставщика</td><td>Сценарный расчёт прибыли и потолка</td></tr>
             </tbody>
           </table>
 
@@ -440,6 +593,9 @@
     supplierTerm: "EXW",
     supplierPriceRubPerBottle: 0.00
   };
+
+  let pinnedKey = null;   // clicked item is pinned
+  let activeKey = null;   // currently active (hover/click)
 
   function num(v){ return Number(v || 0); }
   function fmt(n, digits=2){
@@ -482,7 +638,10 @@
     const otherOps = inp.otherOpsRubPerBottle;
 
     return {
-      origin, ocean, ins, destPort, inland, customs, broker, marking, egais, otherOps,
+      origin, ocean, ins, destPort, inland, customs, broker,
+      marking, egais, otherOps,
+      logTotal: origin + ocean + ins + destPort + inland + customs + broker,
+      opsTotal: marking + egais + otherOps,
       total: origin + ocean + ins + destPort + inland + customs + broker + marking + egais + otherOps
     };
   }
@@ -494,6 +653,199 @@
     return { excise, duty, cz, total: excise + duty + cz };
   }
 
+  function setTooltip(show, x=0, y=0, html=""){
+    const tt = $("tooltip");
+    if (!show){
+      tt.style.display = "none";
+      return;
+    }
+    tt.innerHTML = html;
+    tt.style.display = "block";
+    const pad = 14;
+    let left = x + pad;
+    let top  = y + pad;
+    const rect = tt.getBoundingClientRect();
+    if (left + rect.width > window.innerWidth - 10) left = x - rect.width - pad;
+    if (top + rect.height > window.innerHeight - 10) top = y - rect.height - pad;
+    tt.style.left = left + "px";
+    tt.style.top  = top + "px";
+  }
+
+  function absPack(valPerBottle, inp){
+    const bpc = inp.bottlesPerContainer;
+    const bpm = bpc * inp.containersPerMonth;
+    const bpy = bpm * 12;
+    return {
+      bottle: valPerBottle,
+      cont: valPerBottle * bpc,
+      month: valPerBottle * bpm,
+      year: valPerBottle * bpy
+    };
+  }
+
+  function setSelection(key, label, valPerBottle, inp){
+    activeKey = key;
+    const a = absPack(valPerBottle, inp);
+    $("selName").textContent = label;
+    $("selVals").innerHTML =
+      `на бут: <b>${fmt(a.bottle,2)} ₽</b><br>` +
+      `на конт: <b>${fmt(a.cont,0)} ₽</b><br>` +
+      `на мес: <b>${fmt(a.month,0)} ₽</b><br>` +
+      `на год: <b>${fmt(a.year,0)} ₽</b>`;
+
+    // tile highlight
+    document.querySelectorAll(".tile").forEach(t => t.classList.remove("active"));
+    const tile = document.querySelector(`.tile[data-key="${key}"]`);
+    if (tile) tile.classList.add("active");
+
+    // input highlight
+    highlightInputsForKey(key);
+  }
+
+  function clearHighlights(){
+    document.querySelectorAll(".row").forEach(r => r.classList.remove("active"));
+    document.querySelectorAll(".tile").forEach(t => t.classList.remove("active"));
+  }
+
+  const keyToInputs = {
+    // main groups
+    revenue: ["sellPriceVat","vatRate"],
+    supplier_total: ["supplierPriceRubPerBottle","supplierTerm"],
+    gov_total: ["exciseRubPerLiter","dutyEurPerLiter","eurRub","czCodeRub","bottleLiters"],
+    log_total: ["originRubPerContainer","oceanRubPerContainer","insuranceRubPerContainer","destPortUsdPerContainer","usdRub","inlandRubPerContainer","customsFeeRubPerContainer","brokerFeeRubPerContainer"],
+    ops_total: ["markingServiceRubPerBottle","egaisOpsRubPerBottle","otherOpsRubPerBottle"],
+    profit_target: ["targetNetProfitYear","profitTaxRate"],
+
+    // detail tiles
+    excise: ["exciseRubPerLiter","bottleLiters"],
+    duty: ["dutyEurPerLiter","eurRub","bottleLiters"],
+    czcode: ["czCodeRub"],
+    origin: ["originRubPerContainer","supplierTerm"],
+    ocean: ["oceanRubPerContainer","supplierTerm"],
+    insurance: ["insuranceRubPerContainer","supplierTerm"],
+    destPort: ["destPortUsdPerContainer","usdRub"],
+    inland: ["inlandRubPerContainer"],
+    customsFee: ["customsFeeRubPerContainer"],
+    broker: ["brokerFeeRubPerContainer"],
+    marking: ["markingServiceRubPerBottle"],
+    egais: ["egaisOpsRubPerBottle"],
+    otherOps: ["otherOpsRubPerBottle"],
+    supplier: ["supplierPriceRubPerBottle","supplierTerm"],
+    profit: ["targetNetProfitYear","profitTaxRate"],
+    loss: ["targetNetProfitYear","profitTaxRate"]
+  };
+
+  function highlightInputsForKey(key){
+    clearHighlights();
+    const ids = keyToInputs[key] || [];
+    if (!ids.length) return;
+
+    // highlight rows by matching data-row attribute
+    const seenRows = new Set();
+    ids.forEach(id=>{
+      const row = document.querySelector(`.row[data-row="${id}"]`);
+      if (row){ row.classList.add("active"); seenRows.add(row); }
+    });
+
+    // focus first input
+    const first = $(ids[0]);
+    if (first && (first.tagName === "INPUT" || first.tagName === "SELECT")){
+      first.focus({preventScroll:true});
+      first.scrollIntoView({behavior:"smooth", block:"center"});
+    }
+  }
+
+  function buildMainBar(segments, sellExVat, inp){
+    const bar = $("mainBar");
+    bar.innerHTML = "";
+
+    const denom = Math.max(0.0001, sellExVat);
+    const toPct = (v)=> Math.max(0, (v/denom)*100);
+
+    segments.forEach(seg=>{
+      const w = toPct(seg.value);
+      if (w <= 0) return;
+      const s = document.createElement("span");
+      s.className = "seg";
+      s.tabIndex = 0;
+      s.style.width = w.toFixed(4) + "%";
+      s.style.background = seg.color;
+      s.dataset.key = seg.key;
+
+      const tipHtml = tooltipHtml(seg.label, seg.value, inp);
+      s.addEventListener("mousemove", (e)=> setTooltip(true, e.clientX, e.clientY, tipHtml));
+      s.addEventListener("mouseleave", ()=> { if (!pinnedKey) setTooltip(false); });
+
+      s.addEventListener("mouseenter", ()=>{
+        if (!pinnedKey) setSelection(seg.key, seg.label, seg.value, inp);
+      });
+
+      s.addEventListener("click", ()=>{
+        pinnedKey = (pinnedKey === seg.key) ? null : seg.key;
+        if (pinnedKey){
+          setSelection(seg.key, seg.label, seg.value, inp);
+        } else {
+          // unpinned: keep current selection text but remove pin behavior
+        }
+      });
+
+      s.addEventListener("keydown",(e)=>{
+        if (e.key === "Enter" || e.key === " "){
+          e.preventDefault();
+          s.click();
+        }
+      });
+
+      bar.appendChild(s);
+    });
+  }
+
+  function tooltipHtml(label, valPerBottle, inp){
+    const a = absPack(valPerBottle, inp);
+    return `
+      <div class="h">${label}</div>
+      <div class="m mono">
+        на бут: <b>${fmt(a.bottle,2)} ₽</b><br>
+        на конт: <b>${fmt(a.cont,0)} ₽</b><br>
+        на мес: <b>${fmt(a.month,0)} ₽</b><br>
+        на год: <b>${fmt(a.year,0)} ₽</b>
+      </div>
+    `;
+  }
+
+  function buildTiles(items, inp){
+    const grid = $("detailGrid");
+    grid.innerHTML = "";
+
+    items.forEach(it=>{
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      tile.dataset.key = it.key;
+
+      tile.innerHTML = `
+        <div class="t">${it.group}</div>
+        <div class="v mono">${it.label}: ${fmt(it.value,2)} ₽/бут</div>
+        <div class="c"><span class="pill" style="background:${it.color}"></span><span class="mono">${fmt(it.value * inp.bottlesPerContainer,0)} ₽/конт</span></div>
+      `;
+
+      const tip = tooltipHtml(it.label, it.value, inp);
+      tile.addEventListener("mousemove", (e)=> setTooltip(true, e.clientX, e.clientY, tip));
+      tile.addEventListener("mouseleave", ()=> { if (!pinnedKey) setTooltip(false); });
+
+      tile.addEventListener("mouseenter", ()=>{
+        if (!pinnedKey) setSelection(it.key, it.label, it.value, inp);
+      });
+      tile.addEventListener("click", ()=>{
+        pinnedKey = (pinnedKey === it.key) ? null : it.key;
+        if (pinnedKey){
+          setSelection(it.key, it.label, it.value, inp);
+        }
+      });
+
+      grid.appendChild(tile);
+    });
+  }
+
   function calc(){
     const inp = getInputs();
 
@@ -503,8 +855,8 @@
     const bottlesPerYear  = bottlesPerMonth * 12;
     const containersPerYear = inp.containersPerMonth * 12;
 
-    const targetNetPerBottle = inp.targetNetProfitYear / bottlesPerYear;
-    const targetPBTPerBottle = targetNetPerBottle / (1 - inp.profitTaxRate);
+    const targetNetPerBottle = inp.targetNetProfitYear / Math.max(1, bottlesPerYear);
+    const targetPBTPerBottle = targetNetPerBottle / Math.max(0.0001, (1 - inp.profitTaxRate));
 
     const gov = govCostsPerBottle(inp);
 
@@ -512,17 +864,17 @@
     const payFOB = payableCostsPerBottle("FOB", inp);
     const payCIF = payableCostsPerBottle("CIF", inp);
 
-    const maxSupplier = (term, pay) => sellExVat - targetPBTPerBottle - gov.total - pay.total;
+    const maxSupplier = (pay) => sellExVat - targetPBTPerBottle - gov.total - pay.total;
 
-    const maxEXW = maxSupplier("EXW", payEXW);
-    const maxFOB = maxSupplier("FOB", payFOB);
-    const maxCIF = maxSupplier("CIF", payCIF);
+    const maxEXW = maxSupplier(payEXW);
+    const maxFOB = maxSupplier(payFOB);
+    const maxCIF = maxSupplier(payCIF);
 
-    // factual scenario with supplier price
-    const paySelected = payableCostsPerBottle(inp.supplierTerm, inp);
+    // factual scenario
+    const paySel = payableCostsPerBottle(inp.supplierTerm, inp);
     const supplier = inp.supplierPriceRubPerBottle;
 
-    const totalCostBottle = supplier + gov.total + paySelected.total;
+    const totalCostBottle = supplier + gov.total + paySel.total;
     const pbtBottle = sellExVat - totalCostBottle;
     const netBottle = pbtBottle * (1 - inp.profitTaxRate);
 
@@ -539,8 +891,11 @@
     const netCont = netBottle * inp.bottlesPerContainer;
     const netYear = netBottle * bottlesPerYear;
 
-    // render KPIs
+    // KPIs
     $("outSellExVat").textContent = fmt(sellExVat, 2) + " ₽";
+    $("outSellExVatInline").textContent = fmt(sellExVat, 2) + " ₽/бут";
+    $("outTerm").textContent = inp.supplierTerm;
+
     $("outVolumeYear").textContent = fmt0(bottlesPerYear) + " бут / " + fmt0(containersPerYear) + " конт";
     $("outTargetPBTPerBottle").textContent = fmt(targetPBTPerBottle, 2) + " ₽";
 
@@ -564,57 +919,77 @@
     $("netCont").textContent   = fmt(netCont, 0) + " ₽";
     $("netYear").textContent   = fmt(netYear, 0) + " ₽";
 
-    // goal status
+    // goal KPI
     const diff = netYear - inp.targetNetProfitYear;
-    let statusClass = diff >= 0 ? "ok" : "bad";
-    let statusText = (diff >= 0)
-      ? `ДОСТИГАЕМ цели: ${fmt(netYear,0)} ₽/год (запас ${fmt(diff,0)} ₽)`
-      : `НЕ ДОСТИГАЕМ: ${fmt(netYear,0)} ₽/год (дефицит ${fmt(-diff,0)} ₽)`;
-    $("goalStatus").innerHTML = `<span class="${statusClass}">${statusText}</span>`;
+    const ok = diff >= 0;
+    $("goalKpi").innerHTML = `<span class="${ok ? "ok":"bad"}">${ok ? "OK":"НЕ OK"}</span>`;
+    $("goalKpiSub").innerHTML = `<span class="${ok ? "ok":"bad"}">${ok ? "запас":"дефицит"} ${fmt(Math.abs(diff),0)} ₽</span>`;
 
-    // waterfall bar (relative to sellExVat)
-    const denom = Math.max(0.01, sellExVat);
+    // Main bar segments (high level)
+    const supplierSeg = { key:"supplier_total", label:"Поставщик (итого)", value: Math.max(0, supplier), color:"var(--c-supplier)" };
+    const govSeg = { key:"gov_total", label:"Гос.платежи (итого)", value: Math.max(0, gov.total), color:"var(--c-gov)" };
+    const logSeg = { key:"log_total", label:"Логистика/таможня (итого)", value: Math.max(0, paySel.logTotal), color:"var(--c-log)" };
+    const opsSeg = { key:"ops_total", label:"Маркировка/операции (итого)", value: Math.max(0, paySel.opsTotal), color:"var(--c-ops)" };
 
-    // split payable into "логистика/таможня" vs "маркировка/операции"
-    const logistics =
-      paySelected.origin + paySelected.ocean + paySelected.ins + paySelected.destPort +
-      paySelected.inland + paySelected.customs + paySelected.broker;
+    const profitVal = pbtBottle;
+    const profitSeg = profitVal >= 0
+      ? { key:"profit", label:"Прибыль до налога", value: profitVal, color:"var(--c-profit)" }
+      : { key:"loss", label:"Убыток (дефицит)", value: -profitVal, color:"var(--c-loss)" };
 
-    const ops = paySelected.marking + paySelected.egais + paySelected.otherOps;
+    buildMainBar([supplierSeg, govSeg, logSeg, opsSeg, profitSeg], sellExVat, inp);
 
-    const supplierShare = Math.max(0, supplier);
-    const govShare = Math.max(0, gov.total);
-    const logShare = Math.max(0, logistics);
-    const opsShare = Math.max(0, ops);
-    const pbtShare = Math.max(0, pbtBottle);
+    $("mainBarText").textContent =
+      `Выручка без НДС: ${fmt(sellExVat,2)} ₽/бут. Себестоимость: ${fmt(totalCostBottle,2)} ₽/бут. ` +
+      `PBT: ${fmt(pbtBottle,2)} ₽/бут.`;
 
-    // normalize segments to sellExVat (if costs exceed revenue, bar still shows proportions capped)
-    const totalShown = supplierShare + govShare + logShare + opsShare + pbtShare;
-    const scale = totalShown > 0 ? (100 / totalShown) : 0;
+    // Detail tiles (component-level)
+    const tiles = [];
 
-    const segs = [
-      {w: supplierShare*scale, c:"#7aa7ff", name:"Поставщик", v:supplierShare},
-      {w: govShare*scale,      c:"#ffd1d1", name:"Гос.платежи", v:govShare},
-      {w: logShare*scale,      c:"#ffcc66", name:"Логистика/таможня", v:logShare},
-      {w: opsShare*scale,      c:"#ff8fb1", name:"Маркировка/операции", v:opsShare},
-      {w: pbtShare*scale,      c:"#c6f6d5", name:"Прибыль до налога", v:pbtShare},
-    ];
+    // GOV
+    tiles.push({ key:"excise", group:"Гос.платежи", label:"Акциз", value: gov.excise, color:"var(--c-gov)" });
+    tiles.push({ key:"duty", group:"Гос.платежи", label:"Пошлина", value: gov.duty, color:"var(--c-gov)" });
+    tiles.push({ key:"czcode", group:"Гос.платежи", label:"Код ЧЗ", value: gov.cz, color:"var(--c-gov)" });
 
-    const bar = $("waterfallBar");
-    bar.innerHTML = "";
-    for (const s of segs){
-      const d = document.createElement("span");
-      d.className = "seg";
-      d.style.width = Math.max(0, s.w).toFixed(3) + "%";
-      d.style.background = s.c;
-      d.title = `${s.name}: ${fmt(s.v,2)} ₽/бут`;
-      bar.appendChild(d);
+    // LOG (term dependent)
+    tiles.push({ key:"origin", group:"Логистика/таможня", label:"Origin/local", value: paySel.origin, color:"var(--c-log)" });
+    tiles.push({ key:"ocean", group:"Логистика/таможня", label:"Ocean freight", value: paySel.ocean, color:"var(--c-log)" });
+    tiles.push({ key:"insurance", group:"Логистика/таможня", label:"Страхование", value: paySel.ins, color:"var(--c-log)" });
+    tiles.push({ key:"destPort", group:"Логистика/таможня", label:"Порт РФ (THC)", value: paySel.destPort, color:"var(--c-log)" });
+    tiles.push({ key:"inland", group:"Логистика/таможня", label:"Логистика РФ", value: paySel.inland, color:"var(--c-log)" });
+    tiles.push({ key:"customsFee", group:"Логистика/таможня", label:"Тамож.сбор", value: paySel.customs, color:"var(--c-log)" });
+    tiles.push({ key:"broker", group:"Логистика/таможня", label:"Брокер", value: paySel.broker, color:"var(--c-log)" });
+
+    // OPS
+    tiles.push({ key:"marking", group:"Маркировка/операции", label:"Маркировка (услуга)", value: paySel.marking, color:"var(--c-ops)" });
+    tiles.push({ key:"egais", group:"Маркировка/операции", label:"ЕГАИС/операции", value: paySel.egais, color:"var(--c-ops)" });
+    tiles.push({ key:"otherOps", group:"Маркировка/операции", label:"Прочие операции", value: paySel.otherOps, color:"var(--c-ops)" });
+
+    // Supplier & Profit (detail)
+    tiles.push({ key:"supplier", group:"Поставщик", label:"Цена поставщика", value: supplier, color:"var(--c-supplier)" });
+    tiles.push({ key: (profitVal>=0 ? "profit":"loss"), group:"Прибыль", label:(profitVal>=0 ? "PBT (прибыль)":"PBT (убыток)"), value: Math.abs(profitVal), color:(profitVal>=0 ? "var(--c-profit)":"var(--c-loss)") });
+
+    buildTiles(tiles, inp);
+
+    // keep selection box consistent if pinned
+    if (pinnedKey){
+      // try to find pinned in tiles or bar segments:
+      const found = tiles.find(t=>t.key===pinnedKey);
+      if (found){
+        setSelection(found.key, found.label, found.value, inp);
+      } else {
+        // group segments
+        const map = {
+          supplier_total: supplierSeg,
+          gov_total: govSeg,
+          log_total: logSeg,
+          ops_total: opsSeg,
+          profit: profitSeg,
+          loss: profitSeg
+        };
+        const g = map[pinnedKey];
+        if (g) setSelection(g.key, g.label, g.value, inp);
+      }
     }
-
-    $("waterfallText").textContent =
-      `Термин: ${inp.supplierTerm}. ` +
-      `Поставщик: ${fmt(supplier,2)} ₽ | Гос: ${fmt(gov.total,2)} ₽ | Лог+там: ${fmt(logistics,2)} ₽ | Опер: ${fmt(ops,2)} ₽ | PBT: ${fmt(pbtBottle,2)} ₽ ` +
-      `(все значения на 1 бутылку, без НДС).`;
   }
 
   function bind(){
@@ -629,17 +1004,23 @@
         if (el.tagName === "SELECT") el.value = v;
         else el.value = v;
       }
+      pinnedKey = null;
+      activeKey = null;
+      $("selName").textContent = "—";
+      $("selVals").textContent = "Наведись или кликни по сегменту/плитке";
+      setTooltip(false);
+      clearHighlights();
       calc();
     });
 
     $("btnSave").addEventListener("click", ()=>{
       const data = getInputs();
-      localStorage.setItem("corona_dash_inputs_v1", JSON.stringify(data));
+      localStorage.setItem("corona_dash_inputs_v2", JSON.stringify(data));
       alert("Сохранено в браузере (localStorage).");
     });
 
     $("btnLoad").addEventListener("click", ()=>{
-      const raw = localStorage.getItem("corona_dash_inputs_v1");
+      const raw = localStorage.getItem("corona_dash_inputs_v2");
       if (!raw) { alert("Нет сохранённых данных."); return; }
       const data = JSON.parse(raw);
       for (const [k,v] of Object.entries(data)){
@@ -648,11 +1029,28 @@
         if (el.tagName === "SELECT") el.value = v;
         else el.value = v;
       }
+      pinnedKey = null;
+      activeKey = null;
+      $("selName").textContent = "—";
+      $("selVals").textContent = "Наведись или кликни по сегменту/плитке";
+      setTooltip(false);
+      clearHighlights();
       calc();
     });
+
+    $("btnClearSel").addEventListener("click", ()=>{
+      pinnedKey = null;
+      activeKey = null;
+      $("selName").textContent = "—";
+      $("selVals").textContent = "Наведись или кликни по сегменту/плитке";
+      setTooltip(false);
+      clearHighlights();
+    });
+
+    // hide tooltip when leaving window
+    window.addEventListener("scroll", ()=> { if (!pinnedKey) setTooltip(false); });
   }
 
-  // init
   (function init(){
     bind();
     calc();
